@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  username     String     @unique @db.VarChar(100)
+  password     String     @db.VarChar(100)
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Department {
+  id        Int        @id @default(autoincrement())
+  uuid      String     @default(uuid()) @db.VarChar(100)
+  name      String     @db.VarChar(100)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  Lecturer  Lecturer[]
+  User      User[]
+}
+
+model Lecturer {
+  id           Int        @id @default(autoincrement())
+  uuid         String     @default(uuid()) @db.VarChar(100)
+  name         String     @db.VarChar(100)
+  email        String     @db.VarChar(100)
+  phoneNumber  String     @db.VarChar(30)
+  departmentId Int
+  department   Department @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  Agenda       Agenda[]
+}
+
+model TypeAgenda {
+  id           Int            @id @default(autoincrement())
+  uuid         String         @unique @default(uuid()) @db.VarChar(100)
+  name         String         @db.VarChar(100)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  DetailAgenda DetailAgenda[]
+}
+
+model DetailAgenda {
+  id           Int        @id @default(autoincrement())
+  uuid         String     @unique @default(uuid()) @db.VarChar(100)
+  title        String     @db.VarChar(100)
+  start        String     @db.VarChar(50)
+  finish       String     @db.VarChar(50)
+  typeAgendaId Int
+  typeAgenda   TypeAgenda @relation(fields: [typeAgendaId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  Agenda       Agenda[]
+}
+
+model Agenda {
+  id             Int          @id @default(autoincrement())
+  uuid           String       @unique @default(uuid())
+  lecturerId     Int
+  lecturer       Lecturer     @relation(fields: [lecturerId], references: [id])
+  detailAgendaId Int
+  detailAgenda   DetailAgenda @relation(fields: [detailAgendaId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
