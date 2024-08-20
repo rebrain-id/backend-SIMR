@@ -26,7 +26,7 @@ model User {
 
 model Department {
   id        Int        @id @default(autoincrement())
-  uuid      String     @default(uuid()) @db.VarChar(100)
+  uuid      String     @unique @default(uuid()) @db.VarChar(100)
   name      String     @db.VarChar(100)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
@@ -36,7 +36,7 @@ model Department {
 
 model Lecturer {
   id           Int        @id @default(autoincrement())
-  uuid         String     @default(uuid()) @db.VarChar(100)
+  uuid         String     @unique @default(uuid()) @db.VarChar(100)
   name         String     @db.VarChar(100)
   email        String     @db.VarChar(100)
   phoneNumber  String     @db.VarChar(30)

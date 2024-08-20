@@ -58,7 +58,7 @@ export class TypeAgendaController {
 
   @Version('1')
   @Get(':uuid')
-  async findOne(@Param('id') uuid: string): Promise<Response> {
+  async findOne(@Param('uuid') uuid: string): Promise<Response> {
     try {
       const result = await this.typeAgendaService.findOne(uuid);
       return Response.success(HttpStatus.OK, 'Success get type agenda', result);
