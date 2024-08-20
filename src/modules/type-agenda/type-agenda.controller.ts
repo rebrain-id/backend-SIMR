@@ -1,34 +1,114 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Version,
+  HttpStatus,
+} from '@nestjs/common';
 import { TypeAgendaService } from './type-agenda.service';
 import { CreateTypeAgendumDto } from './dto/create-type-agendum.dto';
 import { UpdateTypeAgendumDto } from './dto/update-type-agendum.dto';
+import { Response } from '../../helper/response';
 
 @Controller('type-agenda')
 export class TypeAgendaController {
   constructor(private readonly typeAgendaService: TypeAgendaService) {}
 
+  @Version('1')
   @Post()
-  create(@Body() createTypeAgendumDto: CreateTypeAgendumDto) {
-    return this.typeAgendaService.create(createTypeAgendumDto);
+  async create(
+    @Body() createTypeAgendumDto: CreateTypeAgendumDto,
+  ): Promise<Response> {
+    try {
+      const result = await this.typeAgendaService.create(createTypeAgendumDto);
+      return Response.success(
+        HttpStatus.CREATED,
+        'Success create type agenda',
+        result,
+      );
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed create type agenda',
+      );
+    }
   }
 
+  @Version('1')
   @Get()
-  findAll() {
-    return this.typeAgendaService.findAll();
+  async findAll(): Promise<Response> {
+    try {
+      const result = await this.typeAgendaService.findAll();
+      return Response.success(
+        HttpStatus.OK,
+        'Success get all type agenda',
+        result,
+      );
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed get all type agenda',
+      );
+    }
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.typeAgendaService.findOne(+id);
+  @Version('1')
+  @Get(':uuid')
+  async findOne(@Param('id') uuid: string): Promise<Response> {
+    try {
+      const result = await this.typeAgendaService.findOne(uuid);
+      return Response.success(HttpStatus.OK, 'Success get type agenda', result);
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed get type agenda',
+      );
+    }
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTypeAgendumDto: UpdateTypeAgendumDto) {
-    return this.typeAgendaService.update(+id, updateTypeAgendumDto);
+  @Version('1')
+  @Patch(':uuid')
+  async update(
+    @Param('uuid') uuid: string,
+    @Body() updateTypeAgendumDto: UpdateTypeAgendumDto,
+  ): Promise<Response> {
+    try {
+      const result = await this.typeAgendaService.update(
+        uuid,
+        updateTypeAgendumDto,
+      );
+      return Response.success(
+        HttpStatus.OK,
+        'Success update type agenda',
+        result,
+      );
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed update type agenda',
+      );
+    }
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.typeAgendaService.remove(+id);
+  @Version('1')
+  @Delete(':uuid')
+  async remove(@Param('uuid') uuid: string) {
+    try {
+      const result = await this.typeAgendaService.remove(uuid);
+      return Response.success(
+        HttpStatus.OK,
+        'Success delete type agenda',
+        result,
+      );
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed delete type agenda',
+      );
+    }
   }
 }
