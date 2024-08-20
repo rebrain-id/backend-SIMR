@@ -60,6 +60,7 @@ model DetailAgenda {
   id           Int        @id @default(autoincrement())
   uuid         String     @unique @default(uuid()) @db.VarChar(100)
   title        String     @db.VarChar(100)
+  description  String     @db.VarChar(255)
   start        String     @db.VarChar(50)
   finish       String     @db.VarChar(50)
   typeAgendaId Int

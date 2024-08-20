@@ -4,6 +4,7 @@ CREATE TABLE `User` (
     `username` VARCHAR(100) NOT NULL,
     `password` VARCHAR(100) NOT NULL,
     `departmentId` INTEGER NOT NULL,
+    `isAdmin` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -53,6 +54,7 @@ CREATE TABLE `DetailAgenda` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `uuid` VARCHAR(100) NOT NULL,
     `title` VARCHAR(100) NOT NULL,
+    `description` VARCHAR(255) NOT NULL,
     `start` VARCHAR(50) NOT NULL,
     `finish` VARCHAR(50) NOT NULL,
     `typeAgendaId` INTEGER NOT NULL,
