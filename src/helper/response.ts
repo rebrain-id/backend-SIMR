@@ -18,12 +18,11 @@ export class Response {
     };
   }
 
-  static error(status: number, message: string, data: any) {
+  static error(status: number, message: string) {
     return new HttpException(
       {
         status: status,
         error: message,
-        data: data,
       },
       status,
     );

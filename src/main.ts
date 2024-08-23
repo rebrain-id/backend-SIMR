@@ -1,6 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import {
+  BadRequestException,
+  ValidationPipe,
+  VersioningType,
+} from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +22,20 @@ async function bootstrap() {
       stopAtFirstError: true,
     }),
   );
+
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
+
+  const config = new DocumentBuilder()
+    .setTitle('SIMR Backend')
+    .setDescription('API Documentation')
+    .setVersion('1.0')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
+
   const PORT = Number(process.env.PORT) || 3000;
   await app.listen(PORT);
 }
