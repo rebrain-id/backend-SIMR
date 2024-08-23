@@ -29,18 +29,22 @@ export class DetailAgendaService {
     const startDate = this.parseDate(start, 'start');
     const endDate = this.parseDate(finish, 'finish');
 
-    const result: DetailAgendum = await this.prisma.detailAgenda.create({
-      data: {
-        title,
-        description,
-        start: startDate,
-        finish: endDate,
-        typeAgendaId: typeAgenda.id,
-      },
-      select: selectedFieldDetailAgenda(),
-    });
+    try {
+      const result: DetailAgendum = await this.prisma.detailAgenda.create({
+        data: {
+          title,
+          description,
+          start: startDate,
+          finish: endDate,
+          typeAgendaId: typeAgenda.id,
+        },
+        select: selectedFieldDetailAgenda(),
+      });
 
-    return result;
+      return result;
+    } catch (error) {
+      throw new HttpException(error.message, 500);
+    }
   }
 
   async findAll(): Promise<DetailAgendum[]> {
@@ -95,39 +99,41 @@ export class DetailAgendaService {
     const startDate = this.parseDate(start, 'start');
     const endDate = this.parseDate(finish, 'finish');
 
-    const result: DetailAgendum = await this.prisma.detailAgenda.update({
-      where: {
-        uuid,
-      },
-      data: {
-        title,
-        description,
-        start: startDate,
-        finish: endDate,
-        typeAgendaId: typeAgenda.id,
-      },
-      select: selectedFieldDetailAgenda(),
-    });
+    try {
+      const result: DetailAgendum = await this.prisma.detailAgenda.update({
+        where: {
+          uuid,
+        },
+        data: {
+          title,
+          description,
+          start: startDate,
+          finish: endDate,
+          typeAgendaId: typeAgenda.id,
+        },
+        select: selectedFieldDetailAgenda(),
+      });
 
-    if (!result) throw new HttpException('internal server error', 500);
+      if (!result) throw new HttpException('internal server error', 500);
 
-    return result;
+      return result;
+    } catch (error) {
+      throw new HttpException(error.message, 500);
+    }
   }
 
   async remove(uuid: string) {
     const exists: DetailAgendum = await this.prisma.detailAgenda.findUnique({
       where: { uuid },
     });
-
     if (!exists) throw new HttpException('Detail Agenda not found', 404);
 
-    await this.prisma.detailAgenda.delete({
-      where: {
-        uuid,
-      },
-    });
-
-    return 'success delete detail agenda with uuid: ' + uuid;
+    try {
+      await this.prisma.detailAgenda.delete({ where: { uuid } });
+      return 'success delete detail agenda with uuid: ' + uuid;
+    } catch (error) {
+      throw new HttpException(error.message, 500);
+    }
   }
 
   //Helper

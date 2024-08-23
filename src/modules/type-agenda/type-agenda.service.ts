@@ -19,19 +19,20 @@ export class TypeAgendaService {
     const exists = await this.prisma.typeAgenda.findFirst({
       where: { name },
     });
-
     if (exists) {
       throw new HttpException('Type Agenda already exists', 400);
     }
-
-    const result = await this.prisma.typeAgenda.create({
-      data: {
-        name,
-      },
-      select: selectedFieldTypeAgenda(),
-    });
-
-    return result;
+    try {
+      const result = await this.prisma.typeAgenda.create({
+        data: {
+          name,
+        },
+        select: selectedFieldTypeAgenda(),
+      });
+      return result;
+    } catch (error) {
+      throw new HttpException('failed create Type Agenda', 500);
+    }
   }
 
   async findAll(): Promise<TypeAgenda[]> {
@@ -72,15 +73,19 @@ export class TypeAgendaService {
 
     if (!exists) throw new HttpException('Type Agenda not found', 404);
 
-    const result: TypeAgenda = await this.prisma.typeAgenda.update({
-      where: { uuid },
-      data: {
-        name,
-      },
-      select: selectedFieldTypeAgenda(),
-    });
+    try {
+      const result: TypeAgenda = await this.prisma.typeAgenda.update({
+        where: { uuid },
+        data: {
+          name,
+        },
+        select: selectedFieldTypeAgenda(),
+      });
 
-    return result;
+      return result;
+    } catch (error) {
+      throw new HttpException('failed update Type Agenda', 500);
+    }
   }
 
   async remove(uuid: string): Promise<string> {
@@ -89,9 +94,12 @@ export class TypeAgendaService {
     });
 
     if (!exists) throw new HttpException('Type Agenda not found', 404);
+    try {
+      await this.prisma.typeAgenda.delete({ where: { uuid } });
 
-    await this.prisma.typeAgenda.delete({ where: { uuid } });
-
-    return 'success delete type agenda with uuid: ' + uuid;
+      return 'success delete type agenda with uuid: ' + uuid;
+    } catch (error) {
+      throw new HttpException('failed delete Type Agenda', 500);
+    }
   }
 }
