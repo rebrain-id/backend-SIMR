@@ -14,7 +14,7 @@ import { CreateTypeAgendumDto } from './dto/create-type-agendum.dto';
 import { UpdateTypeAgendumDto } from './dto/update-type-agendum.dto';
 import { Response } from '../../helper/response';
 
-@Controller('type-agenda')
+@Controller('type-agendas')
 export class TypeAgendaController {
   constructor(private readonly typeAgendaService: TypeAgendaService) {}
 

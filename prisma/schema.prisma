@@ -38,8 +38,8 @@ model Lecturer {
   id           Int        @id @default(autoincrement())
   uuid         String     @unique @default(uuid()) @db.VarChar(100)
   name         String     @db.VarChar(100)
-  email        String?     @db.VarChar(100)
-  phoneNumber  String?     @db.VarChar(30)
+  email        String?    @db.VarChar(100)
+  phoneNumber  String?    @db.VarChar(30)
   departmentId Int
   department   Department @relation(fields: [departmentId], references: [id])
   createdAt    DateTime   @default(now())
