@@ -1,30 +1,30 @@
 import { HttpException } from '@nestjs/common';
 
 export class Response {
-  status: number;
+  statusCode: number;
   message: string;
   data: any;
-  constructor(status: number, message: string, data: any) {
-    this.status = status;
+  constructor(statusCode: number, message: string, data: any) {
+    this.statusCode = statusCode;
     this.message = message;
     this.data = data;
   }
 
-  static success(status: number, message: string, data: any) {
+  static success(statusCode: number, message: string, data: any) {
     return {
-      status: status,
+      statusCode: statusCode,
       message: message,
       data: data,
     };
   }
 
-  static error(status: number, message: string) {
+  static error(statusCode: number, message: string) {
     return new HttpException(
       {
-        status: status,
+        statusCode: statusCode,
         error: message,
       },
-      status,
+      statusCode,
     );
   }
 }

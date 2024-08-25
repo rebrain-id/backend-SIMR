@@ -29,7 +29,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('SIMR Backend')
-    .setDescription('API Documentation')
+    .setDescription(
+      'API Documentation | UNTUK RESPONE APINYA BISA DILIHAT DENGAN POSTMAN ATAU INSOMNIA XIXIXIXI',
+    )
     .setVersion('1.0')
     .build();
 

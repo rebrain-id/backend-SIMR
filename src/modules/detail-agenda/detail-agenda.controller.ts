@@ -14,8 +14,10 @@ import { CreateDetailAgendumDto } from './dto/create-detail-agendum.dto';
 import { UpdateDetailAgendumDto } from './dto/update-detail-agendum.dto';
 import { Response } from '../../helper/response';
 import { DetailAgendum } from './entities/detail-agendum.entity';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('detail-agenda')
+@ApiTags('Detail Agenda')
+@Controller('detail-agendas')
 export class DetailAgendaController {
   constructor(private readonly detailAgendaService: DetailAgendaService) {}
 
