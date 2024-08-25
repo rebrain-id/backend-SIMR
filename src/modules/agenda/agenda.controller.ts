@@ -1,34 +1,72 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+  Version,
+} from '@nestjs/common';
 import { AgendaService } from './agenda.service';
 import { CreateAgendaDto } from './dto/create-agenda.dto';
 import { UpdateAgendaDto } from './dto/update-agenda.dto';
+import { Response } from '../../helper/response';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('agenda')
+@ApiTags('Agenda')
+@Controller('agendas')
 export class AgendaController {
   constructor(private readonly agendaService: AgendaService) {}
 
+  @Version('1')
+  @Post('check')
+  async checkExistAgenda(@Body() createAgendaDto: CreateAgendaDto) {
+    try {
+      const result = await this.agendaService.checkExistAgenda(createAgendaDto);
+      return Response.success(
+        HttpStatus.OK,
+        'Success check exist agenda',
+        result,
+      );
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed check exist agenda',
+      );
+    }
+  }
+
+  @Version('1')
   @Post()
-  create(@Body() createAgendaDto: CreateAgendaDto) {
-    return this.agendaService.create(createAgendaDto);
+  async create(@Body() createAgendaDto: CreateAgendaDto) {
+    try {
+      const result = await this.agendaService.create(createAgendaDto);
+      return Response.success(
+        HttpStatus.CREATED,
+        'Success create agenda',
+        result,
+      );
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed create agenda',
+      );
+    }
   }
 
+  @Version('1')
   @Get()
-  findAll() {
-    return this.agendaService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.agendaService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAgendaDto: UpdateAgendaDto) {
-    return this.agendaService.update(+id, updateAgendaDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.agendaService.remove(+id);
+  async findAll() {
+    try {
+      const result = await this.agendaService.findAll();
+      return Response.success(HttpStatus.OK, 'Success get all agenda', result);
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed get all agenda',
+      );
+    }
   }
 }
