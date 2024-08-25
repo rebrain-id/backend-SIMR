@@ -45,13 +45,13 @@ export class DepartmentController {
       const result = await this.departmentService.findAll();
       return Response.success(
         HttpStatus.OK,
-        'Success get all department',
+        'Success get all departments',
         result,
       );
     } catch (error) {
       throw Response.error(
         error.status,
-        error.message || 'Failed get all department',
+        error.message || 'Failed get all departments',
       );
     }
   }
