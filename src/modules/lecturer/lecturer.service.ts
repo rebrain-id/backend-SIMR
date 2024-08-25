@@ -1,26 +1,138 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { CreateLecturerDto } from './dto/create-lecturer.dto';
 import { UpdateLecturerDto } from './dto/update-lecturer.dto';
+import { PrismaService } from '../../prisma/prisma.service';
+import { Lecturer, selectedFieldLecturer } from './entities/lecturer.entity';
 
 @Injectable()
 export class LecturerService {
-  create(createLecturerDto: CreateLecturerDto) {
-    return 'This action adds a new lecturer';
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(createLecturerDto: CreateLecturerDto): Promise<Lecturer> {
+    const { name, email, phoneNumber, departmentUuid } = createLecturerDto;
+
+    const exists = await this.prisma.lecturer.findFirst({
+      where: { name },
+    });
+
+    if (exists) {
+      throw new HttpException('Lecturer already exists', 400);
+    }
+
+    const department = await this.prisma.department.findUnique({
+      where: { uuid: departmentUuid },
+    });
+
+    if (!department) {
+      throw new HttpException('Department not found', 404);
+    }
+
+    try {
+      const result = await this.prisma.lecturer.create({
+        data: {
+          name,
+          email,
+          phoneNumber,
+          departmentId: department.id,
+        },
+        select: selectedFieldLecturer(),
+      });
+
+      return result;
+    } catch (error) {
+      throw new HttpException('Failed create Lecturer', 500);
+    }
   }
 
-  findAll() {
-    return `This action returns all lecturer`;
+  async findAll(): Promise<Lecturer[]> {
+    const result = await this.prisma.lecturer.findMany({
+      select: selectedFieldLecturer(),
+    });
+
+    if (result.length === 0) {
+      throw new HttpException('Lecturer not found', 404);
+    }
+
+    try {
+      return result;
+    } catch (error) {
+      throw new HttpException('Failed get all Lecturer', 500);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} lecturer`;
+  async findOne(uuid: string): Promise<Lecturer> {
+    const result = await this.prisma.lecturer.findUnique({
+      where: {
+        uuid,
+      },
+      select: selectedFieldLecturer(),
+    });
+
+    if (!result) {
+      throw new HttpException('Lecturer not found', 404);
+    }
+
+    try {
+      return result;
+    } catch (error) {
+      throw new HttpException('Failed get Lecturer', 500);
+    }
   }
 
-  update(id: number, updateLecturerDto: UpdateLecturerDto) {
-    return `This action updates a #${id} lecturer`;
+  async update(
+    uuid: string,
+    updateLecturerDto: UpdateLecturerDto,
+  ): Promise<Lecturer> {
+    const { name, email, phoneNumber, departmentUuid } = updateLecturerDto;
+
+    const exists = await this.prisma.lecturer.findUnique({
+      where: { uuid },
+    });
+
+    if (!exists) {
+      throw new HttpException('Lecturer not found', 404);
+    }
+
+    const department = await this.prisma.department.findUnique({
+      where: { uuid: departmentUuid },
+    });
+
+    if (!department) {
+      throw new HttpException('Department not found', 404);
+    }
+
+    try {
+      const result = await this.prisma.lecturer.update({
+        where: { uuid },
+        data: {
+          name,
+          email,
+          phoneNumber,
+          departmentId: department.id,
+        },
+        select: selectedFieldLecturer(),
+      });
+
+      return result;
+    } catch (error) {
+      throw new HttpException('Failed update Lecturer', 500);
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} lecturer`;
+  async remove(uuid: string): Promise<string> {
+    const exists = await this.prisma.lecturer.findUnique({
+      where: { uuid },
+    });
+
+    if (!exists) {
+      throw new HttpException('Lecturer not found', 404);
+    }
+
+    try {
+      await this.prisma.lecturer.delete({ where: { uuid } });
+      return `Success delete Lecturer with uuid: ${uuid}`;
+    } catch (error) {
+      throw new HttpException('Failed delete Lecturer', 500);
+    }
   }
 }
