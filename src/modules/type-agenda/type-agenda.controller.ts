@@ -13,13 +13,21 @@ import { TypeAgendaService } from './type-agenda.service';
 import { CreateTypeAgendumDto } from './dto/create-type-agendum.dto';
 import { UpdateTypeAgendumDto } from './dto/update-type-agendum.dto';
 import { Response } from '../../helper/response';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { TypeAgenda } from './entities/type-agendum.entity';
 
+@ApiTags('Type Agenda')
 @Controller('type-agendas')
 export class TypeAgendaController {
   constructor(private readonly typeAgendaService: TypeAgendaService) {}
 
   @Version('1')
   @Post()
+  @ApiResponse({
+    status: 201,
+    description: 'Success create type agenda',
+    type: TypeAgenda,
+  })
   async create(
     @Body() createTypeAgendumDto: CreateTypeAgendumDto,
   ): Promise<Response> {
