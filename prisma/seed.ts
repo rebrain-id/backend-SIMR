@@ -6,10 +6,20 @@ const prisma = new PrismaClient();
 async function main() {
   await prisma.lecturer.deleteMany({});
   await prisma.department.deleteMany({});
+  await prisma.user.deleteMany({});
 
   const department = await prisma.department.create({
     data: {
       name: 'S1 Informatika',
+    },
+  });
+
+  const user = await prisma.user.create({
+    data: {
+      username: 'admin',
+      password: 'admin',
+      isAdmin: true,
+      departmentId: department.id,
     },
   });
 

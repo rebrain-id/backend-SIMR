@@ -14,14 +14,15 @@ datasource db {
 }
 
 model User {
-  id           Int        @id @default(autoincrement())
-  username     String     @unique @db.VarChar(100)
-  password     String     @db.VarChar(100)
+  id           Int            @id @default(autoincrement())
+  username     String         @unique @db.VarChar(100)
+  password     String         @db.VarChar(100)
   departmentId Int
-  isAdmin      Boolean    @default(false)
-  department   Department @relation(fields: [departmentId], references: [id])
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  isAdmin      Boolean        @default(false)
+  department   Department     @relation(fields: [departmentId], references: [id])
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  DetailAgenda DetailAgenda[]
 }
 
 model Department {
@@ -40,6 +41,7 @@ model Lecturer {
   name         String     @db.VarChar(100)
   email        String?    @db.VarChar(100)
   phoneNumber  String?    @db.VarChar(30)
+  isKaprodi    Boolean    @default(false)
   departmentId Int
   department   Department @relation(fields: [departmentId], references: [id])
   createdAt    DateTime   @default(now())
@@ -57,17 +59,20 @@ model TypeAgenda {
 }
 
 model DetailAgenda {
-  id           Int        @id @default(autoincrement())
-  uuid         String     @unique @default(uuid()) @db.VarChar(100)
-  title        String     @db.VarChar(100)
-  description  String?    @db.VarChar(255)
-  start        DateTime
-  finish       DateTime
-  typeAgendaId Int
-  typeAgenda   TypeAgenda @relation(fields: [typeAgendaId], references: [id])
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  agenda       Agenda[]
+  id            Int        @id @default(autoincrement())
+  uuid          String     @unique @default(uuid()) @db.VarChar(100)
+  title         String     @db.VarChar(100)
+  description   String?    @db.VarChar(255)
+  start         DateTime
+  finish        DateTime
+  departmentsId Json?
+  typeAgendaId  Int
+  typeAgenda    TypeAgenda @relation(fields: [typeAgendaId], references: [id])
+  userId        Int
+  user          User       @relation(fields: [userId], references: [id])
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  agenda        Agenda[]
 }
 
 model Agenda {
