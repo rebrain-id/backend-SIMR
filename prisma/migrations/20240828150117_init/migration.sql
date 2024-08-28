@@ -3,7 +3,7 @@ CREATE TABLE `User` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(100) NOT NULL,
     `password` VARCHAR(100) NOT NULL,
-    `departmentId` INTEGER NOT NULL,
+    `departmentId` INTEGER NULL,
     `isAdmin` BOOLEAN NOT NULL DEFAULT false,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -29,8 +29,9 @@ CREATE TABLE `Lecturer` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `uuid` VARCHAR(100) NOT NULL,
     `name` VARCHAR(100) NOT NULL,
-    `email` VARCHAR(100) NOT NULL,
-    `phoneNumber` VARCHAR(30) NOT NULL,
+    `email` VARCHAR(100) NULL,
+    `phoneNumber` VARCHAR(30) NULL,
+    `isKaprodi` BOOLEAN NOT NULL DEFAULT false,
     `departmentId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -57,9 +58,12 @@ CREATE TABLE `DetailAgenda` (
     `uuid` VARCHAR(100) NOT NULL,
     `title` VARCHAR(100) NOT NULL,
     `description` VARCHAR(255) NULL,
+    `location` VARCHAR(100) NULL,
     `start` DATETIME(3) NOT NULL,
     `finish` DATETIME(3) NOT NULL,
+    `departmentsId` JSON NULL,
     `typeAgendaId` INTEGER NOT NULL,
+    `userId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
 
@@ -81,13 +85,16 @@ CREATE TABLE `Agenda` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `User` ADD CONSTRAINT `User_departmentId_fkey` FOREIGN KEY (`departmentId`) REFERENCES `Department`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `User` ADD CONSTRAINT `User_departmentId_fkey` FOREIGN KEY (`departmentId`) REFERENCES `Department`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Lecturer` ADD CONSTRAINT `Lecturer_departmentId_fkey` FOREIGN KEY (`departmentId`) REFERENCES `Department`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `DetailAgenda` ADD CONSTRAINT `DetailAgenda_typeAgendaId_fkey` FOREIGN KEY (`typeAgendaId`) REFERENCES `TypeAgenda`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `DetailAgenda` ADD CONSTRAINT `DetailAgenda_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Agenda` ADD CONSTRAINT `Agenda_lecturerId_fkey` FOREIGN KEY (`lecturerId`) REFERENCES `Lecturer`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
