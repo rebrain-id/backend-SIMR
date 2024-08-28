@@ -8,29 +8,55 @@ async function main() {
   await prisma.department.deleteMany({});
   await prisma.user.deleteMany({});
 
-  const department = await prisma.department.create({
+  const department1 = await prisma.department.create({
     data: {
       name: 'S1 Informatika',
     },
   });
 
+  const department2 = await prisma.department.create({
+    data: {
+      name: 'S1 Sistem Informasi',
+    },
+  });
+
   const user = await prisma.user.create({
     data: {
-      username: 'admin',
+      username: 'informatika',
       password: 'admin',
       isAdmin: true,
-      departmentId: department.id,
+      departmentId: department1.id,
+    },
+  });
+
+  const user1 = await prisma.user.create({
+    data: {
+      username: 'sistem-informasi',
+      password: 'admin',
+      isAdmin: true,
+      departmentId: department2.id,
     },
   });
 
   // Seeder for Lecturer
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     await prisma.lecturer.create({
       data: {
         name: faker.name.fullName(),
         email: faker.internet.email(),
         phoneNumber: faker.phone.number('08##########'),
-        departmentId: department.id,
+        departmentId: department1.id,
+      },
+    });
+  }
+
+  for (let i = 0; i < 5; i++) {
+    await prisma.lecturer.create({
+      data: {
+        name: faker.name.fullName(),
+        email: faker.internet.email(),
+        phoneNumber: faker.phone.number('08##########'),
+        departmentId: department2.id,
       },
     });
   }
