@@ -8,6 +8,7 @@ import {
   Delete,
   Version,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { DetailAgendaService } from './detail-agenda.service';
 import { CreateDetailAgendumDto } from './dto/create-detail-agendum.dto';
@@ -45,9 +46,10 @@ export class DetailAgendaController {
 
   @Version('1')
   @Get()
-  async findAll(): Promise<Response> {
+  async findAll(@Query('username') username: string): Promise<Response> {
     try {
-      const result: DetailAgendum[] = await this.detailAgendaService.findAll();
+      const result: DetailAgendum[] =
+        await this.detailAgendaService.findAllByUserDepartment(username);
       return Response.success(
         HttpStatus.OK,
         'Success get all detail agenda',
