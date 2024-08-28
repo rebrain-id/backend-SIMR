@@ -15,6 +15,8 @@ export class DetailAgendum {
   @ApiProperty()
   typeAgenda?: any;
 
+  user?: any;
+
   @ApiProperty()
   start: Date;
 
@@ -23,6 +25,8 @@ export class DetailAgendum {
 
   @ApiProperty()
   description: string;
+
+  location: string;
 
   @ApiProperty()
   createdAt: Date;
@@ -38,6 +42,7 @@ export function selectedFieldDetailAgenda() {
     start: true,
     description: true,
     finish: true,
+    departmentsId: true,
     typeAgenda: {
       select: {
         uuid: true,
@@ -52,10 +57,17 @@ export function selectedFieldDetailAgenda() {
             name: true,
             email: true,
             phoneNumber: true,
+            departmentId: true,
           },
         },
       },
     },
+    user: {
+      select: {
+        username: true,
+      },
+    },
+    location: true,
     createdAt: true,
     updatedAt: true,
   };
