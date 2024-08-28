@@ -1,72 +1,110 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAgendaDto } from './dto/create-agenda.dto';
-import { UpdateAgendaDto } from './dto/update-agenda.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { selectedFieldDetailAgenda } from '../detail-agenda/entities/detail-agendum.entity';
+import { parse } from 'date-fns';
+import { CheckAgendaDto } from './dto/check-agenda.dto';
 
 @Injectable()
 export class AgendaService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async checkExistAgenda(createAgendaDto: CreateAgendaDto) {
-    const { lecturerUuid, detailAgendaUuid } = createAgendaDto;
+  async checkExistAgenda(chekAgendaDto: CheckAgendaDto) {
+    const { departmentsUuid, start, finish } = chekAgendaDto;
 
-    const existLecturer = await this.prisma.lecturer.findUnique({
-      where: { uuid: lecturerUuid[0] },
+    const parseStart = parse(start, 'yyyy-MM-dd HH:mm:ss', new Date());
+    const parseFinish = parse(finish, 'yyyy-MM-dd HH:mm:ss', new Date());
+
+    const getDepartmentId = await this.prisma.department.findMany({
+      where: { uuid: { in: departmentsUuid } },
+      select: { id: true },
+    });
+    if (!getDepartmentId) throw new HttpException('Department not found', 404);
+    const departmentsId = getDepartmentId.map((department) => department.id);
+
+    const getLecturerByDepartments = await this.prisma.lecturer.findMany({
+      where: { departmentId: { in: departmentsId } },
+    });
+
+    const lecturerUuid = getLecturerByDepartments.map(
+      (lecturer) => lecturer.uuid,
+    );
+
+    if (!getLecturerByDepartments)
+      throw new HttpException(
+        'have problem with any departments not found',
+        404,
+      );
+
+    if (!parseStart || !parseFinish)
+      throw new HttpException(
+        'Invalid format for start and finish, use yyyy-MM-dd HH:mm:ss',
+        400,
+      );
+    if (parseFinish < parseStart)
+      throw new HttpException('finish must be greather from start', 400);
+
+    // check exist Lecturer
+    const existLecturer = await this.prisma.lecturer.findMany({
+      where: { uuid: { in: lecturerUuid } },
     });
     if (!existLecturer) throw new HttpException('Lecturer not found', 404);
 
-    const existDetailAgenda = await this.prisma.detailAgenda.findUnique({
-      where: { uuid: detailAgendaUuid },
+    const lecturerId = [];
+    const lecturerName = [];
+    existLecturer.map((lecturer) => {
+      lecturerId.push(lecturer.id);
+      lecturerName.push(lecturer.name);
     });
-    if (!existDetailAgenda)
-      throw new HttpException('Detail Agenda not found', 404);
 
     const existingAgenda = await this.prisma.agenda.findMany({
       where: {
-        lecturerId: existLecturer.id,
+        lecturerId: { in: lecturerId },
         OR: [
           {
             detailAgenda: {
-              start: { lt: existDetailAgenda.finish },
-              finish: { gt: existDetailAgenda.start },
+              start: { lt: parseFinish },
+              finish: { gt: parseStart },
             },
           },
           {
             detailAgenda: {
-              start: { gt: existDetailAgenda.start },
-              finish: { lt: existDetailAgenda.finish },
+              start: { gt: parseStart },
+              finish: { lt: parseFinish },
             },
           },
         ],
       },
+      include: {
+        lecturer: true,
+        detailAgenda: true,
+      },
+    });
+    if (existingAgenda.length === 0)
+      return { conflict: false, message: 'lecturer available' };
+
+    const response = [];
+    existingAgenda.map((agenda) => {
+      response.push({
+        status: 'conflict schedule',
+        lecturerUuid: agenda.lecturer.uuid,
+        name: agenda.lecturer.name,
+        detailAgendaUuid: agenda.detailAgenda.uuid,
+        titleAgenda: agenda.detailAgenda.title,
+        start: agenda.detailAgenda.start,
+        finish: agenda.detailAgenda.finish,
+      });
     });
 
-    const existSchedule = [];
-    const promiseAgenda = existingAgenda.map(async (agenda) => {
-      const detailAgenda = await this.prisma.detailAgenda.findUnique({
-        where: { id: agenda.detailAgendaId },
-      });
-      existSchedule.push({
-        title: detailAgenda.title,
-        start: detailAgenda.start,
-        finish: detailAgenda.finish,
-      });
-    });
-    await Promise.all(promiseAgenda);
+    if (response.length > 0) return response;
 
-    if (existingAgenda.length > 0)
-      return {
-        conflict: true,
-        message: `lecturer ${existLecturer.name} has an agenda`,
-        data: existSchedule,
-      };
-
-    return { conflict: false, message: 'lecturer available' };
+    return { conflict: false, lecturer: 'lecturer available' };
   }
 
-  async create(createAgendaDto: CreateAgendaDto) {
+  async create(createAgendaDto: CreateAgendaDto | any) {
     const { lecturerUuid, detailAgendaUuid } = createAgendaDto;
+    console.log(lecturerUuid);
+    console.log(detailAgendaUuid);
 
     const existDetailAgenda = await this.prisma.detailAgenda.findUnique({
       where: { uuid: detailAgendaUuid },
@@ -115,5 +153,16 @@ export class AgendaService {
     if (result.length === 0) throw new HttpException('Agenda not found', 404);
 
     return result;
+  }
+
+  //Helper
+  private parseDate(dateString: string, fieldName: string): Date {
+    const date = parse(dateString, 'yyyy-MM-dd HH:mm:ss', new Date());
+    if (!date)
+      throw new HttpException(
+        `Invalid format for ${fieldName}, use yyyy-MM-dd HH:mm:ss`,
+        400,
+      );
+    return date;
   }
 }

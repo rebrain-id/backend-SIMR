@@ -1,30 +1,29 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
+  HttpCode,
   HttpStatus,
+  Post,
   Version,
 } from '@nestjs/common';
 import { AgendaService } from './agenda.service';
 import { CreateAgendaDto } from './dto/create-agenda.dto';
-import { UpdateAgendaDto } from './dto/update-agenda.dto';
 import { Response } from '../../helper/response';
 import { ApiTags } from '@nestjs/swagger';
+import { CheckAgendaDto } from './dto/check-agenda.dto';
 
 @ApiTags('Agenda')
 @Controller('agendas')
 export class AgendaController {
   constructor(private readonly agendaService: AgendaService) {}
 
+  @HttpCode(HttpStatus.OK)
   @Version('1')
   @Post('check')
-  async checkExistAgenda(@Body() createAgendaDto: CreateAgendaDto) {
+  async checkExistAgenda(@Body() checkAgendaDto: CheckAgendaDto) {
     try {
-      const result = await this.agendaService.checkExistAgenda(createAgendaDto);
+      const result = await this.agendaService.checkExistAgenda(checkAgendaDto);
       return Response.success(
         HttpStatus.OK,
         'Success check exist agenda',

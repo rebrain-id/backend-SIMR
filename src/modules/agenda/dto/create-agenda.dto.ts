@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAgendaDto {
@@ -7,8 +7,7 @@ export class CreateAgendaDto {
   @IsArray()
   lecturerUuid: string[];
 
-  @ApiProperty({ type: [String] })
-  @IsNotEmpty()
+  @ApiProperty({ type: String })
   @IsString()
   detailAgendaUuid: string;
 }
