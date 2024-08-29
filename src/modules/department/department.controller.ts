@@ -59,11 +59,11 @@ export class DepartmentController {
   @Get()
   @ApiResponse({
     status: 200,
-    description: 'Success get all Departments',
+    description: 'Success get all departments',
     type: 'Department',
     example: {
       statusCode: 200,
-      message: 'Success get all Departments',
+      message: 'Success get all departments',
       data: [
         {
           uuid: 'd1d8a267-365a-4556-8881-12aad8dbde63',
@@ -98,12 +98,7 @@ export class DepartmentController {
 
   @Version('1')
   @Get(':uuid')
-  @ApiParam({
-    name: 'uuid',
-    type: 'string',
-    example: 'd1d8a267-365a-4556-8881-12aad8dbde63',
-    required: true,
-  })
+  @ApiParam({ name: 'uuid', example: 'd1d8a267-365a-4556-8881-12aad8dbde63' })
   @ApiResponse({
     status: 200,
     description: 'Success get Department',
@@ -133,19 +128,14 @@ export class DepartmentController {
 
   @Version('1')
   @Patch(':uuid')
-  @ApiParam({
-    name: 'uuid',
-    type: 'string',
-    example: 'd1d8a267-365a-4556-8881-12aad8dbde63',
-    required: true,
-  })
+  @ApiParam({ name: 'uuid', example: 'd1d8a267-365a-4556-8881-12aad8dbde63' })
   @ApiResponse({
     status: 200,
-    description: 'Success update Department',
+    description: 'Success update department',
     type: 'Department',
     example: {
       statusCode: 200,
-      message: 'Success update Department',
+      message: 'Success update department',
       data: {
         uuid: 'd1d8a267-365a-4556-8881-12aad8dbde63',
         name: 'Sastra Informatika',
@@ -178,15 +168,10 @@ export class DepartmentController {
 
   @Version('1')
   @Delete(':uuid')
-  @ApiParam({
-    name: 'uuid',
-    type: 'string',
-    example: 'd1d8a267-365a-4556-8881-12aad8dbde63',
-    required: true,
-  })
+  @ApiParam({ name: 'uuid', example: 'd1d8a267-365a-4556-8881-12aad8dbde63' })
   @ApiResponse({
     status: 200,
-    description: 'Success delete Department',
+    description: 'Success delete department',
     type: 'Department',
     example: {
       statusCode: 200,
