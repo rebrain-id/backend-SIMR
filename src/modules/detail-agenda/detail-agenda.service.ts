@@ -144,7 +144,6 @@ export class DetailAgendaService {
 
       return response;
     } catch (error) {
-      console.log(error);
       throw new HttpException(error.message, 500);
     }
   }
@@ -173,6 +172,9 @@ export class DetailAgendaService {
         Array.isArray(agenda.departmentsId) &&
         agenda.departmentsId.includes(findUserByUsername.departmentId),
     );
+
+    if (filteredDetailAgendas.length === 0)
+      throw new HttpException('Detail Agenda not found', 404);
     const response = [];
     filteredDetailAgendas.map((agenda) => {
       response.push({
