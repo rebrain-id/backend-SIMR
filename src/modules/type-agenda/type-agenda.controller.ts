@@ -27,6 +27,16 @@ export class TypeAgendaController {
     status: 201,
     description: 'Success create type agenda',
     type: TypeAgenda,
+    example: {
+      statusCode: 200,
+      message: 'Success get all type agenda',
+      data: {
+        uuid: 'gjsdlfjdsflksj',
+        name: 'Rapat Internal',
+        createdAt: '2024-08-29T15:54:04.688Z',
+        updatedAt: '2024-08-29T15:54:04.688Z',
+      },
+    },
   })
   async create(
     @Body() createTypeAgendumDto: CreateTypeAgendumDto,
@@ -48,6 +58,23 @@ export class TypeAgendaController {
 
   @Version('1')
   @Get()
+  @ApiResponse({
+    status: 200,
+    description: 'Success get all type agenda',
+    type: [TypeAgenda],
+    example: {
+      statusCode: 200,
+      message: 'Success get all type agenda',
+      data: [
+        {
+          uuid: 'gjsdlfjdsflksj',
+          name: 'Rapat Internal',
+          createdAt: '2024-08-29T15:54:04.690Z',
+          updatedAt: '2024-08-29T15:54:04.690Z',
+        },
+      ],
+    },
+  })
   async findAll(): Promise<Response> {
     try {
       const result = await this.typeAgendaService.findAll();
@@ -66,6 +93,21 @@ export class TypeAgendaController {
 
   @Version('1')
   @Get(':uuid')
+  @ApiResponse({
+    status: 200,
+    description: 'Success get type agenda',
+    type: TypeAgenda,
+    example: {
+      statusCode: 200,
+      message: 'Success get type agenda',
+      data: {
+        uuid: 'gjsdlfjdsflksj',
+        name: 'Rapat Internal',
+        createdAt: '2024-08-29T15:54:04.688Z',
+        updatedAt: '2024-08-29T15:54:04.688Z',
+      },
+    },
+  })
   async findOne(@Param('uuid') uuid: string): Promise<Response> {
     try {
       const result = await this.typeAgendaService.findOne(uuid);

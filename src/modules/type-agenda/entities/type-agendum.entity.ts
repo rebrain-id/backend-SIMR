@@ -4,7 +4,7 @@ export class TypeAgenda {
   id?: number;
   @ApiProperty({ example: 'gjsdlfjdsflksj' })
   uuid: string;
-  @ApiProperty({ example: 'Rapat prodi' })
+  @ApiProperty({ example: 'Rapat Internal' })
   name: string;
   @ApiProperty()
   createdAt: Date;
