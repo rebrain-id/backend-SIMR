@@ -13,13 +13,17 @@ import { LecturerService } from './lecturer.service';
 import { CreateLecturerDto } from './dto/create-lecturer.dto';
 import { UpdateLecturerDto } from './dto/update-lecturer.dto';
 import { Response } from '../../helper/response';
+import { LecturerDocs } from './doc/lecturer.doc';
+import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Lecturer')
 @Controller('lecturer')
 export class LecturerController {
   constructor(private readonly lecturerService: LecturerService) {}
 
   @Version('1')
   @Post()
+  @ApiResponse(LecturerDocs.createResponse())
   async create(
     @Body() createLecturerDto: CreateLecturerDto,
   ): Promise<Response> {
@@ -40,6 +44,7 @@ export class LecturerController {
 
   @Version('1')
   @Get()
+  @ApiResponse(LecturerDocs.findAllResponse())
   async findAll(): Promise<Response> {
     try {
       const result = await this.lecturerService.findAll();
@@ -58,6 +63,8 @@ export class LecturerController {
 
   @Version('1')
   @Get(':uuid')
+  @ApiParam(LecturerDocs.params())
+  @ApiResponse(LecturerDocs.findOneResponse())
   async findOne(@Param('uuid') uuid: string) {
     try {
       const result = await this.lecturerService.findOne(uuid);
@@ -72,6 +79,8 @@ export class LecturerController {
 
   @Version('1')
   @Patch(':uuid')
+  @ApiParam(LecturerDocs.params())
+  @ApiResponse(LecturerDocs.updateResponse())
   async update(
     @Param('uuid') uuid: string,
     @Body() updateLecturerDto: UpdateLecturerDto,
@@ -89,6 +98,8 @@ export class LecturerController {
 
   @Version('1')
   @Delete(':uuid')
+  @ApiParam(LecturerDocs.params())
+  @ApiResponse(LecturerDocs.removeResponse())
   async remove(@Param('uuid') uuid: string) {
     try {
       const result = await this.lecturerService.remove(uuid);

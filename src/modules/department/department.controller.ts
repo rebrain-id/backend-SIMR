@@ -13,13 +13,17 @@ import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Response } from '../../helper/response';
+import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { DepartmentDocs } from './doc/department.doc';
 
+@ApiTags('Department')
 @Controller('department')
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
 
   @Version('1')
   @Post()
+  @ApiResponse(DepartmentDocs.createResponse())
   async create(
     @Body() createDepartmentDto: CreateDepartmentDto,
   ): Promise<Response> {
@@ -40,6 +44,7 @@ export class DepartmentController {
 
   @Version('1')
   @Get()
+  @ApiResponse(DepartmentDocs.findAllResponse())
   async findAll(): Promise<Response> {
     try {
       const result = await this.departmentService.findAll();
@@ -58,6 +63,8 @@ export class DepartmentController {
 
   @Version('1')
   @Get(':uuid')
+  @ApiParam(DepartmentDocs.params())
+  @ApiResponse(DepartmentDocs.findOneResponse())
   async findOne(@Param('uuid') id: string) {
     try {
       const result = await this.departmentService.findOne(id);
@@ -72,6 +79,8 @@ export class DepartmentController {
 
   @Version('1')
   @Patch(':uuid')
+  @ApiParam(DepartmentDocs.params())
+  @ApiResponse(DepartmentDocs.updateResponse())
   async update(
     @Param('uuid') uuid: string,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
@@ -96,6 +105,8 @@ export class DepartmentController {
 
   @Version('1')
   @Delete(':uuid')
+  @ApiParam(DepartmentDocs.params())
+  @ApiResponse(DepartmentDocs.deleteResponse())
   async remove(@Param('uuid') uuid: string) {
     try {
       const result = await this.departmentService.remove(uuid);
