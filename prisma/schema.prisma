@@ -66,6 +66,8 @@ model DetailAgenda {
   location      String?    @db.VarChar(100)
   start         DateTime
   finish        DateTime
+  absent        String?
+  notulen       String?
   departmentsId Json?
   typeAgendaId  Int
   typeAgenda    TypeAgenda @relation(fields: [typeAgendaId], references: [id])

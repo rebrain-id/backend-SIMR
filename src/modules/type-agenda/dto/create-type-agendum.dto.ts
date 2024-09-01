@@ -2,7 +2,7 @@ import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTypeAgendumDto {
-  @ApiProperty({ example: 'rapat prodi' })
+  @ApiProperty({ example: 'Rapat Internal' })
   @IsNotEmpty()
   @IsString()
   name: string;

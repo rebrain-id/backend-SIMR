@@ -103,8 +103,6 @@ export class AgendaService {
 
   async create(createAgendaDto: CreateAgendaDto | any) {
     const { lecturerUuid, detailAgendaUuid } = createAgendaDto;
-    console.log(lecturerUuid);
-    console.log(detailAgendaUuid);
 
     const existDetailAgenda = await this.prisma.detailAgenda.findUnique({
       where: { uuid: detailAgendaUuid },

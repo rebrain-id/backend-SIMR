@@ -11,3 +11,8 @@ export class Agenda {
   @ApiProperty()
   detailAgenda: any;
 }
+
+export class CheckAgendaNotFound {
+  @ApiProperty({ example: false })
+  conflict: boolean;
+}

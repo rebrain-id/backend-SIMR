@@ -5,10 +5,13 @@ import {
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
+import { join } from 'path';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  app.useStaticAssets(join(__dirname, '..', '../public'));
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -30,7 +33,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('SIMR Backend')
     .setDescription(
-      'API Documentation | UNTUK RESPONE APINYA BISA DILIHAT DENGAN POSTMAN ATAU INSOMNIA XIXIXIXI',
+      'API Documentation | UNTUK RESPOSNE APINYA BISA DILIHAT DENGAN POSTMAN ATAU INSOMNIA COKK GATELL',
     )
     .setVersion('1.0')
     .build();
