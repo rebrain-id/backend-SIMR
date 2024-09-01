@@ -32,5 +32,5 @@ export class UpdateDetailAgendumDto extends PartialType(
 
   @IsNotEmpty()
   @IsNumber()
-  userId: number;
+  username: string;
 }

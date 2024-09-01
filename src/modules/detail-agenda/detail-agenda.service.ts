@@ -3,13 +3,12 @@ import { CreateDetailAgendumDto } from './dto/create-detail-agendum.dto';
 import { UpdateDetailAgendumDto } from './dto/update-detail-agendum.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
-  DetailAgendum,
+  DetailAgendums,
   selectedFieldDetailAgenda,
 } from './entities/detail-agendum.entity';
 import { TypeAgenda } from '../type-agenda/entities/type-agendum.entity';
 import { parse } from 'date-fns';
 import { AgendaService } from '../agenda/agenda.service';
-import { response } from 'express';
 
 @Injectable()
 export class DetailAgendaService {
@@ -84,19 +83,20 @@ export class DetailAgendaService {
       if (lecturerUuid.length === 0)
         throw new HttpException('Not found the lecturers', 404);
 
-      const detailAgenda: DetailAgendum = await this.prisma.detailAgenda.create(
-        {
-          data: {
-            title,
-            description,
-            start: startDate,
-            finish: endDate,
-            userId: parseUserId.id,
-            typeAgendaId: typeAgenda.id,
-            location,
-          },
+      const detailAgenda = await this.prisma.detailAgenda.create({
+        data: {
+          title,
+          description,
+          start: startDate,
+          finish: endDate,
+          userId: parseUserId.id,
+          typeAgendaId: typeAgenda.id,
+          location,
         },
-      );
+        include: {
+          typeAgenda: true,
+        },
+      });
 
       await this.agendaService.create({
         lecturerUuid,
@@ -137,6 +137,10 @@ export class DetailAgendaService {
         location: detailAgenda.location,
         start: detailAgenda.start,
         finish: detailAgenda.finish,
+        typeAgenda: {
+          uuid: detailAgenda.typeAgenda.uuid,
+          name: detailAgenda.typeAgenda.name,
+        },
         departments: extractDepartmentId,
         createdAt: detailAgenda.createdAt,
         updatedAt: detailAgenda.updatedAt,
@@ -149,7 +153,7 @@ export class DetailAgendaService {
   }
   async findAllByUserDepartment(
     username: string,
-  ): Promise<DetailAgendum[] | any> {
+  ): Promise<DetailAgendums[] | any> {
     const findUserByUsername = await this.prisma.user.findUnique({
       where: {
         username,
@@ -175,6 +179,7 @@ export class DetailAgendaService {
 
     if (filteredDetailAgendas.length === 0)
       throw new HttpException('Detail Agenda not found', 404);
+
     const response = [];
     filteredDetailAgendas.map((agenda) => {
       response.push({
@@ -230,6 +235,8 @@ export class DetailAgendaService {
         uuid: detailAgenda.typeAgenda.uuid,
         name: detailAgenda.typeAgenda.name,
       },
+      notulen: detailAgenda.notulen,
+      absent: detailAgenda.absent,
       departments: department,
       location: detailAgenda.location,
       createdAt: detailAgenda.createdAt,
@@ -238,34 +245,22 @@ export class DetailAgendaService {
     return response;
   }
 
-  async update(uuid: string, updateDetailAgendumDto: UpdateDetailAgendumDto) {
-    const { title, description, start, finish, typeAgendaUuid } =
-      updateDetailAgendumDto;
+  async update(
+    uuid: string,
+    updateDetailAgendumDto: UpdateDetailAgendumDto,
+    files,
+  ) {
+    const { title, description, start, finish } = updateDetailAgendumDto;
 
     const exist = await this.prisma.detailAgenda.findUnique({
       where: {
         uuid,
       },
-      select: {
-        typeAgenda: {
-          select: {
-            uuid: true,
-          },
-        },
-      },
     });
+
+    console.log(files.absent[0].filename);
 
     if (!exist) throw new HttpException('Detail Agenda not found', 404);
-
-    const typeAgenda = await this.prisma.typeAgenda.findUnique({
-      where: {
-        uuid: typeAgendaUuid ?? exist.typeAgenda.uuid,
-      },
-    });
-    if (!typeAgenda) throw new HttpException('Type Agenda not found', 404);
-
-    const startDate = this.parseDate(start, 'start');
-    const endDate = this.parseDate(finish, 'finish');
 
     try {
       const result = await this.prisma.detailAgenda.update({
@@ -273,11 +268,8 @@ export class DetailAgendaService {
           uuid,
         },
         data: {
-          title,
-          description,
-          start: startDate,
-          finish: endDate,
-          typeAgendaId: typeAgenda.id,
+          notulen: files.notulen[0].filename ?? null,
+          absent: files.absent[0].filename ?? null,
         },
         select: selectedFieldDetailAgenda(),
       });

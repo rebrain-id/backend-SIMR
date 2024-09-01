@@ -6,6 +6,8 @@ import { AgendaModule } from './modules/agenda/agenda.module';
 import { LecturerModule } from './modules/lecturer/lecturer.module';
 import { DepartmentModule } from './modules/department/department.module';
 import { UserModule } from './modules/user/user.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 import { AuthModule } from './auth/auth.module';
 
