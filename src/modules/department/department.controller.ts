@@ -14,6 +14,7 @@ import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Response } from '../../helper/response';
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { DepartmentDocs } from './doc/department.doc';
 
 @ApiTags('Department')
 @Controller('department')
@@ -22,21 +23,7 @@ export class DepartmentController {
 
   @Version('1')
   @Post()
-  @ApiResponse({
-    status: 201,
-    description: 'Success create department',
-    type: 'Department',
-    example: {
-      statusCode: 201,
-      message: 'Success create department',
-      data: {
-        uuid: 'd1d8a267-365a-4556-8881-12aad8dbde63',
-        name: 'Sastra Informatika',
-        createdAt: '2024-08-29T15:48:02.661Z',
-        updatedAt: '2024-08-29T15:48:02.661Z',
-      },
-    },
-  })
+  @ApiResponse(DepartmentDocs.createResponse())
   async create(
     @Body() createDepartmentDto: CreateDepartmentDto,
   ): Promise<Response> {
@@ -57,29 +44,7 @@ export class DepartmentController {
 
   @Version('1')
   @Get()
-  @ApiResponse({
-    status: 200,
-    description: 'Success get all departments',
-    type: 'Department',
-    example: {
-      statusCode: 200,
-      message: 'Success get all departments',
-      data: [
-        {
-          uuid: 'd1d8a267-365a-4556-8881-12aad8dbde63',
-          name: 'Sastra Informatika',
-          createdAt: '2024-08-29T15:48:02.661Z',
-          updatedAt: '2024-08-29T15:48:02.661Z',
-        },
-        {
-          uuid: 'c77dc43f-888e-4c60-8795-08660f95326b',
-          name: 'Kimia Syariah',
-          createdAt: '2024-08-29T15:55:30.638Z',
-          updatedAt: '2024-08-29T15:55:30.638Z',
-        },
-      ],
-    },
-  })
+  @ApiResponse(DepartmentDocs.findAllResponse())
   async findAll(): Promise<Response> {
     try {
       const result = await this.departmentService.findAll();
@@ -98,22 +63,8 @@ export class DepartmentController {
 
   @Version('1')
   @Get(':uuid')
-  @ApiParam({ name: 'uuid', example: 'd1d8a267-365a-4556-8881-12aad8dbde63' })
-  @ApiResponse({
-    status: 200,
-    description: 'Success get Department',
-    type: 'Department',
-    example: {
-      statusCode: 200,
-      message: 'Success get Department',
-      data: {
-        uuid: 'd1d8a267-365a-4556-8881-12aad8dbde63',
-        name: 'Sastra Informatika',
-        createdAt: '2024-08-29T15:48:02.661Z',
-        updatedAt: '2024-08-29T15:48:02.661Z',
-      },
-    },
-  })
+  @ApiParam(DepartmentDocs.params())
+  @ApiResponse(DepartmentDocs.findOneResponse())
   async findOne(@Param('uuid') id: string) {
     try {
       const result = await this.departmentService.findOne(id);
@@ -128,22 +79,8 @@ export class DepartmentController {
 
   @Version('1')
   @Patch(':uuid')
-  @ApiParam({ name: 'uuid', example: 'd1d8a267-365a-4556-8881-12aad8dbde63' })
-  @ApiResponse({
-    status: 200,
-    description: 'Success update department',
-    type: 'Department',
-    example: {
-      statusCode: 200,
-      message: 'Success update department',
-      data: {
-        uuid: 'd1d8a267-365a-4556-8881-12aad8dbde63',
-        name: 'Sastra Informatika',
-        createdAt: '2024-08-29T15:48:02.661Z',
-        updatedAt: '2024-08-29T15:48:02.661Z',
-      },
-    },
-  })
+  @ApiParam(DepartmentDocs.params())
+  @ApiResponse(DepartmentDocs.updateResponse())
   async update(
     @Param('uuid') uuid: string,
     @Body() updateDepartmentDto: UpdateDepartmentDto,
@@ -168,17 +105,8 @@ export class DepartmentController {
 
   @Version('1')
   @Delete(':uuid')
-  @ApiParam({ name: 'uuid', example: 'd1d8a267-365a-4556-8881-12aad8dbde63' })
-  @ApiResponse({
-    status: 200,
-    description: 'Success delete department',
-    type: 'Department',
-    example: {
-      statusCode: 200,
-      message: 'Success delete department',
-      data: 'Success delete Department with uuid: d1d8a267-365a-4556-8881-12aad8dbde63',
-    },
-  })
+  @ApiParam(DepartmentDocs.params())
+  @ApiResponse(DepartmentDocs.deleteResponse())
   async remove(@Param('uuid') uuid: string) {
     try {
       const result = await this.departmentService.remove(uuid);
