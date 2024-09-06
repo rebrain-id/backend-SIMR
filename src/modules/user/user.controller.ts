@@ -12,7 +12,6 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
 import { Response } from '../../helper/response';
 
 @Controller('user')
@@ -31,17 +30,6 @@ export class UserController {
       );
     } catch (error) {
       throw Response.error(error.status, error.message || 'Failed create user');
-    }
-  }
-
-  @Version('1')
-  @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto): Promise<Response> {
-    try {
-      const result = await this.userService.login(loginUserDto);
-      return Response.success(HttpStatus.OK, 'Success login', result);
-    } catch (error) {
-      throw Response.error(error.status, error.message || 'Failed login');
     }
   }
 

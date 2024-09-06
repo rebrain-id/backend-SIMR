@@ -1,9 +1,11 @@
+import { Role } from '@prisma/client';
+
 export class User {
   id?: number;
   username: string;
   password: string;
   departmentId?: number;
-  isAdmin: boolean;
+  role: Role;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,7 +20,7 @@ export function selectedFieldUser() {
         name: true,
       },
     },
-    isAdmin: true,
+    role: true,
     createdAt: true,
     updatedAt: true,
   };

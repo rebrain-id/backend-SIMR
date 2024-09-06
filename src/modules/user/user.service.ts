@@ -4,14 +4,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { selectedFieldUser, User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
-import { LoginUserDto } from './dto/login-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async register(createUserDto: CreateUserDto): Promise<User> {
-    const { username, password, departmentUuid, isAdmin } = createUserDto;
+    const { username, password, departmentUuid } = createUserDto;
 
     const user = await this.prisma.user.findFirst({
       where: { username },
@@ -37,7 +36,6 @@ export class UserService {
           username,
           password: passwordHash,
           departmentId: department.id,
-          isAdmin,
         },
         select: selectedFieldUser(),
       });
@@ -45,29 +43,6 @@ export class UserService {
       return result;
     } catch (error) {
       throw new HttpException('Failed create User', 500);
-    }
-  }
-
-  async login(loginUserDto: LoginUserDto): Promise<User> {
-    const { username, password } = loginUserDto;
-
-    const user = await this.prisma.user.findUnique({
-      where: { username },
-      select: selectedFieldUser(),
-    });
-
-    if (!user) {
-      throw new HttpException('Username or password is wrong', 400);
-    }
-
-    if (!(await bcrypt.compare(password, user.password))) {
-      throw new HttpException('Username or password is wrong', 400);
-    }
-
-    try {
-      return user;
-    } catch (error) {
-      throw new HttpException('Failed login User', 500);
     }
   }
 
@@ -108,49 +83,70 @@ export class UserService {
     userUsername: string,
     updateUserDto: UpdateUserDto,
   ): Promise<User> {
-    const { username, oldPassword, newPassword, departmentUuid, isAdmin } =
+    const { username, oldPassword, newPassword, departmentUuid, role } =
       updateUserDto;
 
     const user = await this.prisma.user.findUnique({
       where: { username: userUsername },
     });
 
-    if (user.username === username) {
-      throw new HttpException('User already exists', 404);
-    } else if (!user) {
+    if (!user) {
       throw new HttpException('User not found', 404);
     }
 
-    const department = await this.prisma.department.findUnique({
-      where: { uuid: departmentUuid },
-    });
-
-    if (!department) {
-      throw new HttpException('Department not found', 404);
+    if (username && userUsername === username) {
+      throw new HttpException('Username cannot be same', 400);
     }
 
-    if (oldPassword && !(await bcrypt.compare(oldPassword, user.password))) {
-      throw new HttpException('Old password is wrong', 400);
+    if (username && username !== user.username) {
+      const existingUser = await this.prisma.user.findUnique({
+        where: { username },
+      });
+
+      if (existingUser) {
+        throw new HttpException('Username already exists', 400);
+      }
     }
 
-    const newPasswordHash = await bcrypt.hash(newPassword, 10);
+    if (departmentUuid) {
+      const department = await this.prisma.department.findUnique({
+        where: { uuid: departmentUuid },
+      });
+
+      if (!department) {
+        throw new HttpException('Department not found', 404);
+      }
+      user.departmentId = department.id;
+    }
+
+    if (oldPassword && newPassword) {
+      if (!(await bcrypt.compare(oldPassword, user.password))) {
+        throw new HttpException('Old password is wrong', 400);
+      }
+      user.password = await bcrypt.hash(newPassword, 10);
+    }
+
+    if (role) {
+      user.role = role;
+    }
+
+    user.username = username || user.username;
 
     try {
-      const result = await this.prisma.user.update({
+      const updatedUser = await this.prisma.user.update({
         where: { username: userUsername },
         data: {
-          username,
-          password: newPasswordHash,
-          departmentId: department.id,
-          isAdmin,
+          username: user.username,
+          password: user.password,
+          departmentId: user.departmentId,
+          role: user.role,
         },
         select: selectedFieldUser(),
       });
 
-      return result;
+      return updatedUser;
     } catch (error) {
-      console.error('Error updating user:', error);
-      throw new HttpException('Failed update User', 500);
+      throw new HttpException('Failed to update User', 500);
     }
   }
 
