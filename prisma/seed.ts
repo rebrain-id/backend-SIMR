@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 const prisma = new PrismaClient();
@@ -24,7 +24,7 @@ async function main() {
     data: {
       username: 'informatika',
       password: 'admin',
-      isAdmin: true,
+      role: Role.FAKULTAS,
       departmentId: department1.id,
     },
   });
@@ -33,7 +33,7 @@ async function main() {
     data: {
       username: 'sistem-informasi',
       password: 'admin',
-      isAdmin: true,
+      role: Role.PRODI,
       departmentId: department2.id,
     },
   });
