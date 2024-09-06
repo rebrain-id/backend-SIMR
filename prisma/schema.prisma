@@ -18,11 +18,26 @@ model User {
   username     String         @unique @db.VarChar(100)
   password     String         @db.VarChar(100)
   departmentId Int?
-  isAdmin      Boolean        @default(false)
+  role         Role           @default(PRODI)
   department   Department?    @relation(fields: [departmentId], references: [id])
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   DetailAgenda DetailAgenda[]
+  refToken     RefToken[]
+}
+
+model RefToken {
+  id        Int      @id @default(autoincrement())
+  token     String   @unique @db.VarChar(255)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  FAKULTAS
+  PRODI
 }
 
 model Department {
