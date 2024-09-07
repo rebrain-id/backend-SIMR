@@ -154,6 +154,8 @@ export class DetailAgendaService {
   async findAllByUserDepartment(
     username: string,
   ): Promise<DetailAgendums[] | any> {
+    if (!username) throw new HttpException('Username not found', 404);
+
     const findUserByUsername = await this.prisma.user.findUnique({
       where: {
         username,

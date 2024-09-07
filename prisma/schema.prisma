@@ -83,6 +83,7 @@ model DetailAgenda {
   finish        DateTime
   absent        String?
   notulen       String?
+  isDone        Boolean    @default(false)
   departmentsId Json?
   typeAgendaId  Int
   typeAgenda    TypeAgenda @relation(fields: [typeAgendaId], references: [id])
