@@ -28,6 +28,7 @@ import {
   findAllDetailAgendaDoc,
   findOneDetailAgendaDoc,
 } from './doc/detail-agenda.doc';
+import { FileUploadInterceptor } from './upload-service/upload.service';
 
 @ApiTags('Detail Agenda')
 @Controller('detail-agendas')
@@ -109,17 +110,7 @@ export class DetailAgendaController {
           maxCount: 1,
         },
       ],
-      {
-        storage: diskStorage({
-          destination: 'public',
-          filename: (req, file, callback) => {
-            const uniqueSuffix =
-              Date.now() + '-' + Math.round(Math.random() * 1e9);
-            const ext = extname(file.originalname);
-            callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
-          },
-        }),
-      },
+      new FileUploadInterceptor().createMulterOptions(),
     ),
   )
   async update(
