@@ -8,11 +8,15 @@ import {
   Delete,
   Version,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Response } from '../../helper/response';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
 
 @Controller('user')
 export class UserController {
@@ -34,6 +38,8 @@ export class UserController {
   }
 
   @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PRODI', 'FAKULTAS')
   @Get()
   async findAll() {
     try {

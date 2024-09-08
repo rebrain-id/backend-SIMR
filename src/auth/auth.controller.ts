@@ -3,7 +3,6 @@ import {
   Controller,
   HttpStatus,
   Param,
-  ParseIntPipe,
   Post,
   Version,
 } from '@nestjs/common';
@@ -31,28 +30,23 @@ export class AuthController {
   }
 
   @Version('1')
-  @Post('refresh-token')
+  @Post('get-access/:refreshToken')
   async refreshToken(
-    @Body('refreshToken') refreshToken: string,
+    @Param('refreshToken') refreshToken: string,
   ): Promise<Response> {
     try {
       const result = await this.authService.refreshToken(refreshToken);
-      return Response.success(HttpStatus.OK, 'Success refresh token', result);
+      return Response.success(HttpStatus.OK, 'Success get access', result);
     } catch (error) {
-      throw Response.error(
-        error.status,
-        error.message || 'Failed refresh token',
-      );
+      throw Response.error(error.status, error.message || 'Failed get access');
     }
   }
 
   @Version('1')
-  @Post('logout/:userId')
-  async logout(
-    @Param('userId', ParseIntPipe) userId: number,
-  ): Promise<Response> {
+  @Post('logout/:username')
+  async logout(@Param('username') username: string): Promise<Response> {
     try {
-      const result = await this.authService.logout(userId);
+      const result = await this.authService.logout(username);
       return Response.success(HttpStatus.OK, 'Success logout', result);
     } catch (error) {
       throw Response.error(error.status, error.message || 'Failed logout');
