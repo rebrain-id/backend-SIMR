@@ -13,11 +13,12 @@ export class AuthService {
   ) {}
 
   async login(username: string, password: string): Promise<any> {
-    const user = await this.userService.findOne(username);
-    console.log(user);
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+    });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { password, ...result } = user;
+      const { id, password, ...result } = user;
 
       const payload = {
         username: user.username,
@@ -86,9 +87,11 @@ export class AuthService {
     };
   }
 
-  async logout(userId: number): Promise<any> {
+  async logout(username: string): Promise<any> {
+    const user = await this.userService.findOne(username);
+
     const result = await this.prisma.refToken.deleteMany({
-      where: { userId },
+      where: { userId: user.id },
     });
 
     try {
