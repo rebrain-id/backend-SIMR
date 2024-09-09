@@ -57,7 +57,7 @@ export class DetailAgendaController {
   }
 
   @Version('1')
-  @Get()
+  @Get(':username')
   @ApiResponse(findAllDetailAgendaDoc())
   async findAll(@Query('username') username: string): Promise<Response> {
     try {
