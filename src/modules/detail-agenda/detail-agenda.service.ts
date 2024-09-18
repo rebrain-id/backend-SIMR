@@ -254,6 +254,9 @@ export class DetailAgendaService {
   ) {
     const { title, description, start, finish } = updateDetailAgendumDto;
 
+    const startDate = this.parseDate(start, 'start');
+    const endDate = this.parseDate(finish, 'finish');
+
     const exist = await this.prisma.detailAgenda.findUnique({
       where: {
         uuid,
@@ -270,6 +273,10 @@ export class DetailAgendaService {
           uuid,
         },
         data: {
+          title,
+          description,
+          start: startDate,
+          finish: endDate,
           notulen: files.notulen[0].filename ?? null,
           absent: files.absent[0].filename ?? null,
         },
