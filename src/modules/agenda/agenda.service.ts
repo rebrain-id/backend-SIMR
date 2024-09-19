@@ -9,7 +9,7 @@ import { CheckAgendaDto } from './dto/check-agenda.dto';
 export class AgendaService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async checkExistAgenda(chekAgendaDto: CheckAgendaDto) {
+  async checkExistAgendaV2(chekAgendaDto: CheckAgendaDto) {
     const { departmentsUuid, start, finish } = chekAgendaDto;
 
     const parseStart = parse(start, 'yyyy-MM-dd HH:mm:ss', new Date());
@@ -57,7 +57,7 @@ export class AgendaService {
       lecturerName.push(lecturer.name);
     });
 
-    const existingAgenda = await this.prisma.agenda.findMany({
+    const existingDepartmentAgenda = await this.prisma.agenda.findMany({
       where: {
         lecturerId: { in: lecturerId },
         OR: [
@@ -80,15 +80,13 @@ export class AgendaService {
         detailAgenda: true,
       },
     });
-    if (existingAgenda.length === 0)
+    if (existingDepartmentAgenda.length === 0)
       return { conflict: false, message: 'lecturer available' };
 
     const response = [];
-    existingAgenda.map((agenda) => {
+    existingDepartmentAgenda.map((agenda) => {
       response.push({
         status: 'conflict schedule',
-        lecturerUuid: agenda.lecturer.uuid,
-        name: agenda.lecturer.name,
         detailAgendaUuid: agenda.detailAgenda.uuid,
         titleAgenda: agenda.detailAgenda.title,
         start: agenda.detailAgenda.start,
@@ -101,7 +99,77 @@ export class AgendaService {
     return { conflict: false, lecturer: 'lecturer available' };
   }
 
-  async create(createAgendaDto: CreateAgendaDto | any) {
+  async checkExistAgenda(chekAgendaDto: CheckAgendaDto) {
+    const { departmentsUuid, start, finish } = chekAgendaDto;
+
+    const parseStart = parse(start, 'yyyy-MM-dd HH:mm:ss', new Date());
+    const parseFinish = parse(finish, 'yyyy-MM-dd HH:mm:ss', new Date());
+
+    const getDepartmentId = await this.prisma.department.findMany({
+      where: { uuid: { in: departmentsUuid } },
+      select: { id: true },
+    });
+    if (!getDepartmentId) throw new HttpException('Department not found', 404);
+    const departmentsId = getDepartmentId.map((department) => department.id);
+
+    if (!parseStart || !parseFinish)
+      throw new HttpException(
+        'Invalid format for start and finish, use yyyy-MM-dd HH:mm:ss',
+        400,
+      );
+    if (parseFinish < parseStart)
+      throw new HttpException('finish must be greather from start', 400);
+
+    const existingDepartmentAgenda =
+      await this.prisma.departmentAgenda.findMany({
+        where: {
+          departmentId: { in: departmentsId },
+          OR: [
+            {
+              detailAgenda: {
+                start: { lt: parseFinish },
+                finish: { gt: parseStart },
+              },
+            },
+            {
+              detailAgenda: {
+                start: { gt: parseStart },
+                finish: { lt: parseFinish },
+              },
+            },
+          ],
+        },
+        include: {
+          detailAgenda: true,
+          department: true,
+        },
+      });
+    if (existingDepartmentAgenda.length === 0)
+      return { conflict: false, message: 'lecturer available' };
+
+    const response = [];
+    existingDepartmentAgenda.map((agenda) => {
+      response.push({
+        status: 'conflict',
+        detailAgenda: {
+          uuid: agenda.detailAgenda.uuid,
+          titleAgenda: agenda.detailAgenda.title,
+        },
+        department: {
+          uuid: agenda.department.uuid,
+          name: agenda.department.name,
+        },
+        start: agenda.detailAgenda.start,
+        finish: agenda.detailAgenda.finish,
+      });
+    });
+
+    if (response.length > 0) return response;
+
+    return { conflict: false, lecturer: 'lecturer available' };
+  }
+
+  async createV2(createAgendaDto: CreateAgendaDto | any) {
     const { lecturerUuid, detailAgendaUuid } = createAgendaDto;
 
     const existDetailAgenda = await this.prisma.detailAgenda.findUnique({
@@ -144,6 +212,47 @@ export class AgendaService {
     });
 
     return detailAgenda;
+  }
+
+  async create(createAgendaDto) {
+    const { detailAgendaUuid, departmentsUuid } = createAgendaDto;
+
+    const checkDetailAgenda = await this.prisma.detailAgenda.findUnique({
+      where: { uuid: detailAgendaUuid },
+      select: {
+        id: true,
+      },
+    });
+    if (!checkDetailAgenda) {
+      throw new HttpException('Detail Agenda not found', 404);
+    }
+
+    const checkDepartments = await this.prisma.department.findMany({
+      where: { uuid: { in: departmentsUuid } },
+      select: {
+        id: true,
+      },
+    });
+    if (checkDepartments.length === 0) {
+      throw new HttpException('Department not found', 404);
+    }
+
+    const dataDepartmentAgendas = [];
+    checkDepartments.map((deparment) => {
+      dataDepartmentAgendas.push({
+        departmentId: deparment.id,
+        detailAgendaId: checkDetailAgenda.id,
+      });
+    });
+
+    try {
+      await this.prisma.departmentAgenda.createMany({
+        data: dataDepartmentAgendas,
+      });
+    } catch (e) {
+      console.log(e);
+      throw new HttpException('Failed create Agenda', 500);
+    }
   }
 
   async findAll() {

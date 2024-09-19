@@ -41,13 +41,14 @@ enum Role {
 }
 
 model Department {
-  id        Int        @id @default(autoincrement())
-  uuid      String     @unique @default(uuid()) @db.VarChar(100)
-  name      String     @db.VarChar(100)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  lecturer  Lecturer[]
-  user      User[]
+  id               Int                @id @default(autoincrement())
+  uuid             String             @unique @default(uuid()) @db.VarChar(100)
+  name             String             @db.VarChar(100)
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  lecturer         Lecturer[]
+  user             User[]
+  DepartmentAgenda DepartmentAgenda[]
 }
 
 model Lecturer {
@@ -73,25 +74,37 @@ model TypeAgenda {
   detailAgenda DetailAgenda[]
 }
 
+model DepartmentAgenda {
+  id             Int          @id @default(autoincrement())
+  uuid           String       @unique @default(uuid()) @db.VarChar(100)
+  departmentId   Int
+  department     Department   @relation(fields: [departmentId], references: [id])
+  detailAgendaId Int
+  detailAgenda   DetailAgenda @relation(fields: [detailAgendaId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
 model DetailAgenda {
-  id            Int        @id @default(autoincrement())
-  uuid          String     @unique @default(uuid()) @db.VarChar(100)
-  title         String     @db.VarChar(100)
-  description   String?    @db.VarChar(255)
-  location      String?    @db.VarChar(100)
-  start         DateTime
-  finish        DateTime
-  absent        String?
-  notulen       String?
-  isDone        Boolean    @default(false)
-  departmentsId Json?
-  typeAgendaId  Int
-  typeAgenda    TypeAgenda @relation(fields: [typeAgendaId], references: [id])
-  userId        Int
-  user          User       @relation(fields: [userId], references: [id])
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  agenda        Agenda[]
+  id               Int                @id @default(autoincrement())
+  uuid             String             @unique @default(uuid()) @db.VarChar(100)
+  title            String             @db.VarChar(100)
+  description      String?            @db.VarChar(255)
+  location         String?            @db.VarChar(100)
+  start            DateTime
+  finish           DateTime
+  absent           String?
+  notulen          String?
+  isDone           Boolean            @default(false)
+  departmentsId    Json?
+  typeAgendaId     Int
+  typeAgenda       TypeAgenda         @relation(fields: [typeAgendaId], references: [id])
+  userId           Int
+  user             User               @relation(fields: [userId], references: [id])
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  agenda           Agenda[]
+  DepartmentAgenda DepartmentAgenda[]
 }
 
 model Agenda {
