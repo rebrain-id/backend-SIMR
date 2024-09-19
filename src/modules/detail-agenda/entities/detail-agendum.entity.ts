@@ -83,6 +83,7 @@ export function selectedFieldDetailAgenda() {
     description: true,
     finish: true,
     departmentsId: true,
+    isDone: true,
     typeAgenda: {
       select: {
         uuid: true,

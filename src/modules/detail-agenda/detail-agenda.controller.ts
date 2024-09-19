@@ -21,8 +21,6 @@ import {
 } from './entities/detail-agendum.entity';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import {
   createDetailAgendaDoc,
   findAllDetailAgendaDoc,
@@ -134,6 +132,7 @@ export class DetailAgendaController {
         result,
       );
     } catch (error) {
+      console.log(error);
       throw Response.error(
         error.status,
         error.message || 'Failed update detail agenda',
