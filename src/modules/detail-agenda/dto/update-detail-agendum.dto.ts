@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateDetailAgendumDto } from './create-detail-agendum.dto';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateDetailAgendumDto extends PartialType(
@@ -33,4 +33,6 @@ export class UpdateDetailAgendumDto extends PartialType(
   @IsNotEmpty()
   @IsNumber()
   username: string;
+
+  isDone: boolean;
 }

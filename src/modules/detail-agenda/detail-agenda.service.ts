@@ -251,6 +251,7 @@ export class DetailAgendaService {
         title: agenda.title,
         start: agenda.start,
         finish: agenda.finish,
+        isDone: agenda.isDone,
         typeAgenda: {
           uuid: agenda.typeAgenda.uuid,
           name: agenda.typeAgenda.name,
@@ -299,6 +300,7 @@ export class DetailAgendaService {
         uuid: detailAgenda.typeAgenda.uuid,
         name: detailAgenda.typeAgenda.name,
       },
+      isDone: detailAgenda.isDone,
       notulen: detailAgenda.notulen,
       absent: detailAgenda.absent,
       departments: department,
@@ -314,40 +316,67 @@ export class DetailAgendaService {
     updateDetailAgendumDto: UpdateDetailAgendumDto,
     files,
   ) {
-    const { title, description, start, finish } = updateDetailAgendumDto;
-
-    const startDate = this.parseDate(start, 'start');
-    const endDate = this.parseDate(finish, 'finish');
+    const { title, description, start, finish, isDone } =
+      updateDetailAgendumDto;
 
     const exist = await this.prisma.detailAgenda.findUnique({
       where: {
         uuid,
       },
     });
-
     if (!exist) throw new HttpException('Detail Agenda not found', 404);
 
-    try {
-      const result = await this.prisma.detailAgenda.update({
-        where: {
-          uuid,
-        },
-        data: {
-          title,
-          description,
-          start: startDate,
-          finish: endDate,
-          notulen: files.notulen[0].filename ?? null,
-          absent: files.absent[0].filename ?? null,
-        },
-        select: selectedFieldDetailAgenda(),
-      });
+    if (!start || finish) {
+      const startDate = this.parseDate(start, 'start');
+      const endDate = this.parseDate(finish, 'finish');
 
-      if (!result) throw new HttpException('internal server error', 500);
+      try {
+        const result = await this.prisma.detailAgenda.update({
+          where: {
+            uuid,
+          },
+          data: {
+            title,
+            description,
+            start: startDate,
+            finish: endDate,
+            isDone: Boolean(isDone),
+            notulen: files.notulen[0].filename ?? null,
+            absent: files.absent[0].filename ?? null,
+          },
+          select: selectedFieldDetailAgenda(),
+        });
 
-      return result;
-    } catch (error) {
-      throw new HttpException(error.message, 500);
+        if (!result) throw new HttpException('internal server error', 500);
+
+        return result;
+      } catch (error) {
+        console.log(error);
+        throw new HttpException(error.message, 500);
+      }
+    } else {
+      try {
+        const result = await this.prisma.detailAgenda.update({
+          where: {
+            uuid,
+          },
+          data: {
+            title,
+            description,
+            isDone: Boolean(isDone),
+            notulen: files.notulen[0].filename ?? null,
+            absent: files.absent[0].filename ?? null,
+          },
+          select: selectedFieldDetailAgenda(),
+        });
+
+        if (!result) throw new HttpException('internal server error', 500);
+
+        return result;
+      } catch (error) {
+        console.log(error);
+        throw new HttpException(error.message, 500);
+      }
     }
   }
 
