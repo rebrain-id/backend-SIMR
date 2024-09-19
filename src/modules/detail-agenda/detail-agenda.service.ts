@@ -17,7 +17,7 @@ export class DetailAgendaService {
     private readonly agendaService: AgendaService,
   ) {}
 
-  async create(createDetailAgendumDto: CreateDetailAgendumDto): Promise<any> {
+  async createV2(createDetailAgendumDto: CreateDetailAgendumDto): Promise<any> {
     const {
       title,
       description,
@@ -151,6 +151,68 @@ export class DetailAgendaService {
       throw new HttpException(error.message, 500);
     }
   }
+
+  async create(createDetailAgendumDto: any): Promise<any> {
+    const {
+      title,
+      description,
+      start,
+      finish,
+      typeAgendaUuid,
+      username,
+      departmentsUuid,
+      location,
+    } = createDetailAgendumDto;
+
+    const startDate = this.parseDate(start, 'start');
+    const endDate = this.parseDate(finish, 'finish');
+    if (startDate > endDate)
+      throw new HttpException('finish must be greather from start', 400);
+
+    const typeAgenda: TypeAgenda = await this.prisma.typeAgenda.findUnique({
+      where: {
+        uuid: typeAgendaUuid,
+      },
+    });
+    if (!typeAgenda) throw new HttpException('Type Agenda not found', 404);
+
+    const parseUserId = await this.prisma.user.findUnique({
+      where: {
+        username: username,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!parseUserId) throw new HttpException('Username not found', 404);
+
+    try {
+      const createDetailAgenda = await this.prisma.detailAgenda.create({
+        data: {
+          title,
+          description,
+          start: startDate,
+          finish: endDate,
+          userId: parseUserId.id,
+          typeAgendaId: typeAgenda.id,
+          location,
+        },
+      });
+
+      const createDepartmentAgenda = await this.agendaService.create({
+        detailAgendaUuid: createDetailAgenda.uuid,
+        departmentsUuid,
+      });
+
+      console.log(createDepartmentAgenda);
+
+      return createDetailAgenda;
+    } catch (e) {
+      console.log(e);
+      throw new HttpException(e.message, 500);
+    }
+  }
   async findAllByUserDepartment(
     username: string,
   ): Promise<DetailAgendums[] | any> {
@@ -262,8 +324,6 @@ export class DetailAgendaService {
         uuid,
       },
     });
-
-    console.log(files.absent[0].filename);
 
     if (!exist) throw new HttpException('Detail Agenda not found', 404);
 
