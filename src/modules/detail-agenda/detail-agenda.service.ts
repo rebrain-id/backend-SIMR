@@ -213,7 +213,81 @@ export class DetailAgendaService {
       throw new HttpException(e.message, 500);
     }
   }
+
+  async findAll() {
+    const detailAgenda = await this.prisma.detailAgenda.findMany({});
+    return detailAgenda;
+  }
+
   async findAllByUserDepartment(
+    username: string,
+  ): Promise<DetailAgendums[] | any> {
+    if (!username) throw new HttpException('Username not found', 404);
+
+    const findUserByUsername = await this.prisma.user.findUnique({
+      where: {
+        username,
+      },
+      select: {
+        departmentId: true,
+      },
+    });
+    if (!findUserByUsername) throw new HttpException('User not found', 404);
+
+    const departmentsAgenda = await this.prisma.departmentAgenda.findMany({
+      where: {
+        departmentId: findUserByUsername.departmentId,
+      },
+      select: {
+        detailAgenda: {
+          select: {
+            uuid: true,
+            title: true,
+            start: true,
+            finish: true,
+            isDone: true,
+            location: true,
+            typeAgenda: {
+              select: {
+                uuid: true,
+                name: true,
+              },
+            },
+            user: {
+              select: {
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (departmentsAgenda.length === 0)
+      throw new HttpException('Detail Agenda not found', 404);
+
+    const dataAgenda = [];
+    departmentsAgenda.forEach((agenda) => {
+      dataAgenda.push({
+        uuid: agenda.detailAgenda.uuid,
+        title: agenda.detailAgenda.title,
+        start: agenda.detailAgenda.start,
+        finish: agenda.detailAgenda.finish,
+        isDone: agenda.detailAgenda.isDone,
+        location: agenda.detailAgenda.location,
+        typeAgenda: {
+          uuid: agenda.detailAgenda.typeAgenda.uuid,
+        },
+        author: {
+          username: agenda.detailAgenda.user.username,
+        },
+      });
+    });
+
+    return dataAgenda;
+  }
+
+  async findAllByUserDepartmentV2(
     username: string,
   ): Promise<DetailAgendums[] | any> {
     if (!username) throw new HttpException('Username not found', 404);
@@ -268,26 +342,28 @@ export class DetailAgendaService {
       where: {
         uuid,
       },
-      select: selectedFieldDetailAgenda(),
+      include: {
+        typeAgenda: true,
+      },
     });
 
     if (!detailAgenda) throw new HttpException('Detail Agenda not found', 404);
 
-    const departmentId = [];
-    detailAgenda.agenda.map((agenda) => {
-      departmentId.push(agenda.lecturer.departmentId);
+    const departments = await this.prisma.departmentAgenda.findMany({
+      where: {
+        detailAgendaId: detailAgenda.id,
+      },
+      include: {
+        department: true,
+      },
     });
 
-    const department = await this.prisma.department.findMany({
-      where: {
-        id: {
-          in: departmentId,
-        },
-      },
-      select: {
-        uuid: true,
-        name: true,
-      },
+    const dataDeparments = [];
+    departments.forEach((department) => {
+      dataDeparments.push({
+        uuid: department.department.uuid,
+        name: department.department.name,
+      });
     });
 
     const response = {
@@ -300,10 +376,10 @@ export class DetailAgendaService {
         uuid: detailAgenda.typeAgenda.uuid,
         name: detailAgenda.typeAgenda.name,
       },
+      departments: dataDeparments,
       isDone: detailAgenda.isDone,
       notulen: detailAgenda.notulen,
       absent: detailAgenda.absent,
-      departments: department,
       location: detailAgenda.location,
       createdAt: detailAgenda.createdAt,
       updatedAt: detailAgenda.updatedAt,
@@ -326,7 +402,7 @@ export class DetailAgendaService {
     });
     if (!exist) throw new HttpException('Detail Agenda not found', 404);
 
-    if (!start || finish) {
+    if (!start || !finish) {
       const startDate = this.parseDate(start, 'start');
       const endDate = this.parseDate(finish, 'finish');
 
@@ -344,7 +420,6 @@ export class DetailAgendaService {
             notulen: files.notulen[0].filename ?? null,
             absent: files.absent[0].filename ?? null,
           },
-          select: selectedFieldDetailAgenda(),
         });
 
         if (!result) throw new HttpException('internal server error', 500);
