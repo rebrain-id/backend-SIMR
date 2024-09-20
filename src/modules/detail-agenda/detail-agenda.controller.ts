@@ -57,10 +57,30 @@ export class DetailAgendaController {
   @Version('1')
   @Get()
   @ApiResponse(findAllDetailAgendaDoc())
-  async findAll(@Query('username') username: string): Promise<Response> {
+  async findAllByDepartment(
+    @Query('username') username: string,
+  ): Promise<Response> {
     try {
       const result: DetailAgendums[] =
         await this.detailAgendaService.findAllByUserDepartment(username);
+      return Response.success(
+        HttpStatus.OK,
+        'Success get all detail agenda',
+        result,
+      );
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed get all detail agenda',
+      );
+    }
+  }
+
+  @Version('1')
+  @Get('all')
+  async findAllAll(): Promise<Response> {
+    try {
+      const result = await this.detailAgendaService.findAll();
       return Response.success(
         HttpStatus.OK,
         'Success get all detail agenda',
