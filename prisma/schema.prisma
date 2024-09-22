@@ -78,9 +78,9 @@ model DepartmentAgenda {
   id             Int          @id @default(autoincrement())
   uuid           String       @unique @default(uuid()) @db.VarChar(100)
   departmentId   Int
-  department     Department   @relation(fields: [departmentId], references: [id])
+  department     Department   @relation(fields: [departmentId], references: [id], onDelete: Cascade)
   detailAgendaId Int
-  detailAgenda   DetailAgenda @relation(fields: [detailAgendaId], references: [id])
+  detailAgenda   DetailAgenda @relation(fields: [detailAgendaId], references: [id], onDelete: Cascade)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 }
