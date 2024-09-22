@@ -395,6 +395,8 @@ export class DetailAgendaService {
     const { title, description, start, finish, isDone } =
       updateDetailAgendumDto;
 
+    console.log(files);
+
     const exist = await this.prisma.detailAgenda.findUnique({
       where: {
         uuid,
@@ -417,8 +419,8 @@ export class DetailAgendaService {
             start: startDate,
             finish: endDate,
             isDone: Boolean(isDone),
-            notulen: files.notulen[0].filename ?? null,
-            absent: files.absent[0].filename ?? null,
+            notulen: files?.notulen?.[0]?.filename || undefined,
+            absent: files?.absent?.[0]?.filename || undefined,
           },
         });
 
@@ -439,8 +441,8 @@ export class DetailAgendaService {
             title,
             description,
             isDone: Boolean(isDone),
-            notulen: files.notulen[0].filename ?? null,
-            absent: files.absent[0].filename ?? null,
+            notulen: files?.notulen?.[0]?.filename || undefined,
+            absent: files?.absent?.[0]?.filename || undefined,
           },
           select: selectedFieldDetailAgenda(),
         });
