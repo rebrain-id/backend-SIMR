@@ -14,9 +14,9 @@ export class FileUploadInterceptor implements MulterOptionsFactory {
       storage: diskStorage({
         destination: (req: Request, file: Express.Multer.File, callback) => {
           if (file.mimetype === 'application/pdf') {
-            callback(null, 'public/notulen');
+            callback(null, 'public');
           } else if (file.mimetype.startsWith('image/')) {
-            callback(null, 'public/absent');
+            callback(null, 'public');
           } else {
             callback(new HttpException('invalid file type', 400), null);
           }
@@ -25,7 +25,7 @@ export class FileUploadInterceptor implements MulterOptionsFactory {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
-          callback(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+          callback(null, `${file.fieldname}/${uniqueSuffix}${ext}`);
         },
       }),
       fileFilter: (req: Request, file: Express.Multer.File, callback) => {
