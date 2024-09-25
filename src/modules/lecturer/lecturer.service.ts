@@ -44,8 +44,27 @@ export class LecturerService {
     }
   }
 
-  async findAll(): Promise<Lecturer[]> {
+  async findAll(query: {
+    department?: string;
+    name?: string;
+  }): Promise<Lecturer[]> {
     const result = await this.prisma.lecturer.findMany({
+      where: {
+        name: {
+          equals: query.name,
+        },
+        department: query.department
+          ? {
+              name: {
+                equals: query.department,
+              },
+            }
+          : {
+              name: {
+                equals: '',
+              },
+            },
+      },
       select: selectedFieldLecturer(),
     });
 

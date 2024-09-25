@@ -8,13 +8,14 @@ import {
   Delete,
   Version,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { LecturerService } from './lecturer.service';
 import { CreateLecturerDto } from './dto/create-lecturer.dto';
 import { UpdateLecturerDto } from './dto/update-lecturer.dto';
 import { Response } from '../../helper/response';
 import { LecturerDocs } from './doc/lecturer.doc';
-import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Lecturer')
 @Controller('lecturer')
@@ -44,10 +45,14 @@ export class LecturerController {
 
   @Version('1')
   @Get()
+  @ApiQuery(LecturerDocs.queryDepartment())
+  @ApiQuery(LecturerDocs.queryName())
   @ApiResponse(LecturerDocs.findAllResponse())
-  async findAll(): Promise<Response> {
+  async findAll(
+    @Query() query: { department?: string; name?: string },
+  ): Promise<Response> {
     try {
-      const result = await this.lecturerService.findAll();
+      const result = await this.lecturerService.findAll(query);
       return Response.success(
         HttpStatus.OK,
         'Success get all lecturers',
