@@ -8,6 +8,7 @@ import {
   Delete,
   Version,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { TypeAgendaService } from './type-agenda.service';
 import { CreateTypeAgendumDto } from './dto/create-type-agendum.dto';
@@ -15,8 +16,13 @@ import { UpdateTypeAgendumDto } from './dto/update-type-agendum.dto';
 import { Response } from '../../helper/response';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { TypeAgenda } from './entities/type-agendum.entity';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
 
 @ApiTags('Type Agenda')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('PRODI')
 @Controller('type-agendas')
 export class TypeAgendaController {
   constructor(private readonly typeAgendaService: TypeAgendaService) {}

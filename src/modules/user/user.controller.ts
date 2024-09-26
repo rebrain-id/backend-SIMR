@@ -41,7 +41,7 @@ export class UserController {
 
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('PRODI', 'FAKULTAS')
+  @Roles('PRODI')
   @Get()
   async findAll() {
     try {
@@ -56,6 +56,8 @@ export class UserController {
   }
 
   @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PRODI')
   @Get(':username')
   async findOne(@Param('username') username: string) {
     try {
@@ -67,6 +69,8 @@ export class UserController {
   }
 
   @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PRODI')
   @Patch(':username')
   async update(
     @Param('username') username: string,
@@ -81,6 +85,8 @@ export class UserController {
   }
 
   @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PRODI')
   @Delete(':username')
   async remove(@Param('username') username: string) {
     try {

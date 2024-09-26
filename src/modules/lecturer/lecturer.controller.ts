@@ -9,6 +9,7 @@ import {
   Version,
   HttpStatus,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { LecturerService } from './lecturer.service';
 import { CreateLecturerDto } from './dto/create-lecturer.dto';
@@ -16,8 +17,13 @@ import { UpdateLecturerDto } from './dto/update-lecturer.dto';
 import { Response } from '../../helper/response';
 import { LecturerDocs } from './doc/lecturer.doc';
 import { ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
 
 @ApiTags('Lecturer')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('PRODI')
 @Controller('lecturer')
 export class LecturerController {
   constructor(private readonly lecturerService: LecturerService) {}

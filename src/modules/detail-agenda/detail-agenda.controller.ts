@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   UploadedFiles,
+  UseGuards,
   UseInterceptors,
   Version,
 } from '@nestjs/common';
@@ -27,8 +28,13 @@ import {
   findOneDetailAgendaDoc,
 } from './doc/detail-agenda.doc';
 import { FileUploadInterceptor } from './upload-service/upload.service';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
 
 @ApiTags('Detail Agenda')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('PRODI')
 @Controller('detail-agendas')
 export class DetailAgendaController {
   constructor(private readonly detailAgendaService: DetailAgendaService) {}
