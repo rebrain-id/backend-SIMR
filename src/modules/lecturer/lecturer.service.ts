@@ -50,9 +50,13 @@ export class LecturerService {
   }): Promise<Lecturer[]> {
     const result = await this.prisma.lecturer.findMany({
       where: {
-        name: {
-          equals: query.name,
-        },
+        name: query.name
+          ? {
+              equals: query.name,
+            }
+          : {
+              contains: '',
+            },
         department: query.department
           ? {
               name: {
@@ -61,7 +65,7 @@ export class LecturerService {
             }
           : {
               name: {
-                equals: '',
+                contains: '',
               },
             },
       },
