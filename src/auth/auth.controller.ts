@@ -9,7 +9,9 @@ import {
 import { AuthService } from './auth.service';
 import { LoginUserDto } from 'src/modules/user/dto/login-user.dto';
 import { Response } from 'src/helper/response';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -30,9 +32,9 @@ export class AuthController {
   }
 
   @Version('1')
-  @Post('get-access/:refreshToken')
+  @Post('get-access')
   async refreshToken(
-    @Param('refreshToken') refreshToken: string,
+    @Body('refreshToken') refreshToken: string,
   ): Promise<Response> {
     try {
       const result = await this.authService.refreshToken(refreshToken);

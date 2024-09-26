@@ -3,11 +3,30 @@ export class LecturerDocs {
     return { name: 'uuid', example: '7c82d4c1-439d-42e6-9ef5-d5d2bd104bb2' };
   }
 
+  static queryDepartment() {
+    return {
+      name: 'department',
+      type: String,
+      required: false,
+      description: 'Filter by department',
+      example: 'Sastra Informatika',
+    };
+  }
+
+  static queryName() {
+    return {
+      name: 'name',
+      type: String,
+      required: false,
+      description: 'Filter by name',
+      example: 'Sang Surya',
+    };
+  }
+
   static createResponse() {
     return {
       status: 200,
       description: 'Success get lecturer',
-      type: 'Lecturer',
       example: {
         statusCode: 200,
         message: 'Success get lecturer',
@@ -31,7 +50,6 @@ export class LecturerDocs {
     return {
       status: 200,
       description: 'Success get all lecturers',
-      type: 'Lecturer',
       example: {
         statusCode: 200,
         message: 'Success get all lecturers',
@@ -69,7 +87,6 @@ export class LecturerDocs {
     return {
       status: 200,
       description: 'Success get lecturer',
-      type: 'Lecturer',
       example: {
         statusCode: 200,
         message: 'Success get lecturer',
@@ -93,7 +110,6 @@ export class LecturerDocs {
     return {
       status: 200,
       description: 'Success update lecturer',
-      type: 'Lecturer',
       example: {
         statusCode: 200,
         message: 'Success update lecturer',
@@ -117,7 +133,6 @@ export class LecturerDocs {
     return {
       status: 200,
       description: 'Success delete lecturer',
-      type: 'Lecturer',
       example: {
         statusCode: 200,
         message: 'Success delete lecturer',

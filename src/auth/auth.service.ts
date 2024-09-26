@@ -1,13 +1,11 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UserService } from 'src/modules/user/user.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private userService: UserService,
     private jwtService: JwtService,
     private prisma: PrismaService,
   ) {}
@@ -18,8 +16,6 @@ export class AuthService {
     });
 
     if (user && (await bcrypt.compare(password, user.password))) {
-      const { id, password, ...result } = user;
-
       const payload = {
         username: user.username,
         sub: user.id,
@@ -33,7 +29,7 @@ export class AuthService {
 
       const refreshToken = await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET_KEY,
-        expiresIn: '7d',
+        expiresIn: '30d',
       });
 
       const userId = await this.prisma.user.findUnique({
@@ -49,7 +45,6 @@ export class AuthService {
       });
 
       return {
-        ...result,
         refresh_token: refreshToken,
         access_token: accessToken,
       };
@@ -88,7 +83,9 @@ export class AuthService {
   }
 
   async logout(username: string): Promise<any> {
-    const user = await this.userService.findOne(username);
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+    });
 
     const result = await this.prisma.refToken.deleteMany({
       where: { userId: user.id },

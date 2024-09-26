@@ -7,7 +7,6 @@ export class DepartmentDocs {
     return {
       status: 201,
       description: 'Success create department',
-      type: 'Department',
       example: {
         statusCode: 201,
         message: 'Success create department',
@@ -25,7 +24,6 @@ export class DepartmentDocs {
     return {
       status: 200,
       description: 'Success get all departments',
-      type: 'Department',
       example: {
         statusCode: 200,
         message: 'Success get all departments',
@@ -51,7 +49,6 @@ export class DepartmentDocs {
     return {
       status: 200,
       description: 'Success get department',
-      type: 'Department',
       example: {
         statusCode: 200,
         message: 'Success get department',
@@ -69,7 +66,6 @@ export class DepartmentDocs {
     return {
       status: 200,
       description: 'Success update department',
-      type: 'Department',
       example: {
         statusCode: 200,
         message: 'Success update department',
@@ -87,7 +83,6 @@ export class DepartmentDocs {
     return {
       status: 200,
       description: 'Success delete department',
-      type: 'Department',
       example: {
         statusCode: 200,
         message: 'Success delete department',
