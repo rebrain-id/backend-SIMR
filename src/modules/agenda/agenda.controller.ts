@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  UseGuards,
   Version,
 } from '@nestjs/common';
 import { AgendaService } from './agenda.service';
@@ -13,8 +14,13 @@ import { Response } from '../../helper/response';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CheckAgendaDto } from './dto/check-agenda.dto';
 import { checkExistAgenda } from './doc/agenda.doc';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
 
 @ApiTags('Agenda')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('PRODI')
 @Controller('agendas')
 export class AgendaController {
   constructor(private readonly agendaService: AgendaService) {}

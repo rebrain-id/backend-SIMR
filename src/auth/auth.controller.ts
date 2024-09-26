@@ -4,12 +4,16 @@ import {
   HttpStatus,
   Param,
   Post,
+  UseGuards,
   Version,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from 'src/modules/user/dto/login-user.dto';
 import { Response } from 'src/helper/response';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -32,6 +36,8 @@ export class AuthController {
   }
 
   @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PRODI')
   @Post('get-access')
   async refreshToken(
     @Body('refreshToken') refreshToken: string,
@@ -45,6 +51,8 @@ export class AuthController {
   }
 
   @Version('1')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('PRODI')
   @Post('logout/:username')
   async logout(@Param('username') username: string): Promise<Response> {
     try {

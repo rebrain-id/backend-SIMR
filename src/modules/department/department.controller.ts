@@ -8,6 +8,7 @@ import {
   Delete,
   Version,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
@@ -15,8 +16,13 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { Response } from '../../helper/response';
 import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DepartmentDocs } from './doc/department.doc';
+import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { Roles } from 'src/guards/roles.decorator';
 
 @ApiTags('Department')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('PRODI')
 @Controller('department')
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}
