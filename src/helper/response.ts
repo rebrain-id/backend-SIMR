@@ -10,11 +10,17 @@ export class Response {
     this.data = data;
   }
 
-  static success(statusCode: number, message: string, data: any) {
+  static success(
+    statusCode: number,
+    message: string,
+    data: any,
+    totalData?: number,
+  ) {
     return {
       statusCode: statusCode,
       message: message,
       data: data,
+      totalData,
     };
   }
 
