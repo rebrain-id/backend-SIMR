@@ -9,6 +9,7 @@ import {
   Version,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
@@ -51,13 +52,16 @@ export class DepartmentController {
   @Version('1')
   @Get()
   @ApiResponse(DepartmentDocs.findAllResponse())
-  async findAll(): Promise<Response> {
+  async findAll(
+    @Query() query: { name?: string; page?: number; limit?: number },
+  ): Promise<Response> {
     try {
-      const result = await this.departmentService.findAll();
+      const { result, totalData } = await this.departmentService.findAll(query);
       return Response.success(
         HttpStatus.OK,
         'Success get all departments',
         result,
+        totalData,
       );
     } catch (error) {
       throw Response.error(

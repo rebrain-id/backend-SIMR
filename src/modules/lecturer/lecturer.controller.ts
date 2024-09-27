@@ -55,14 +55,21 @@ export class LecturerController {
   @ApiQuery(LecturerDocs.queryName())
   @ApiResponse(LecturerDocs.findAllResponse())
   async findAll(
-    @Query() query: { department?: string; name?: string },
+    @Query()
+    query: {
+      department?: string;
+      name?: string;
+      page?: number;
+      limit?: number;
+    },
   ): Promise<Response> {
     try {
-      const result = await this.lecturerService.findAll(query);
+      const { result, totalData } = await this.lecturerService.findAll(query);
       return Response.success(
         HttpStatus.OK,
         'Success get all lecturers',
         result,
+        totalData,
       );
     } catch (error) {
       throw Response.error(

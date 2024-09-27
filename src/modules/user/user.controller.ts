@@ -9,6 +9,7 @@ import {
   Version,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,6 +19,7 @@ import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { Role } from '@prisma/client';
 
 @ApiTags('User')
 @Controller('user')
@@ -43,10 +45,24 @@ export class UserController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PRODI')
   @Get()
-  async findAll() {
+  async findAll(
+    @Query()
+    query: {
+      username?: string;
+      department?: string;
+      role?: Role;
+      page?: number;
+      limit?: number;
+    },
+  ) {
     try {
-      const result = await this.userService.findAll();
-      return Response.success(HttpStatus.OK, 'Success get all users', result);
+      const { result, totalData } = await this.userService.findAll(query);
+      return Response.success(
+        HttpStatus.OK,
+        'Success get all users',
+        result,
+        totalData,
+      );
     } catch (error) {
       throw Response.error(
         error.status,

@@ -36,8 +36,27 @@ export class DepartmentService {
     }
   }
 
-  async findAll(): Promise<Department[]> {
+  async findAll(query: {
+    name?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<{ result: Department[]; totalData: number }> {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const totalData = await this.prisma.department.count({
+      where: {
+        name: query.name ? { equals: query.name } : { contains: '' },
+      },
+    });
+
     const result = await this.prisma.department.findMany({
+      where: {
+        name: query.name ? { equals: query.name } : { contains: '' },
+      },
+      skip: offset,
+      take: limit,
       select: selectedFieldDepartment(),
     });
 
@@ -46,7 +65,7 @@ export class DepartmentService {
     }
 
     try {
-      return result;
+      return { result, totalData };
     } catch (error) {
       throw new HttpException('Failed get all Department', 500);
     }

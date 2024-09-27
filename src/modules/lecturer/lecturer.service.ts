@@ -47,28 +47,31 @@ export class LecturerService {
   async findAll(query: {
     department?: string;
     name?: string;
-  }): Promise<Lecturer[]> {
+    page?: number;
+    limit?: number;
+  }): Promise<{ result: Lecturer[]; totalData: number }> {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    const totalData = await this.prisma.lecturer.count({
+      where: {
+        name: query.name ? { equals: query.name } : { contains: '' },
+        department: query.department
+          ? { name: { equals: query.department } }
+          : { name: { contains: '' } },
+      },
+    });
+
     const result = await this.prisma.lecturer.findMany({
       where: {
-        name: query.name
-          ? {
-              equals: query.name,
-            }
-          : {
-              contains: '',
-            },
+        name: query.name ? { equals: query.name } : { contains: '' },
         department: query.department
-          ? {
-              name: {
-                equals: query.department,
-              },
-            }
-          : {
-              name: {
-                contains: '',
-              },
-            },
+          ? { name: { equals: query.department } }
+          : { name: { contains: '' } },
       },
+      skip: offset,
+      take: limit,
       select: selectedFieldLecturer(),
     });
 
@@ -77,7 +80,7 @@ export class LecturerService {
     }
 
     try {
-      return result;
+      return { result, totalData };
     } catch (error) {
       throw new HttpException('Failed get all Lecturer', 500);
     }
