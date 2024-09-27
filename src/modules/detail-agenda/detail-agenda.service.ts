@@ -200,16 +200,13 @@ export class DetailAgendaService {
         },
       });
 
-      const createDepartmentAgenda = await this.agendaService.create({
+      await this.agendaService.create({
         detailAgendaUuid: createDetailAgenda.uuid,
         departmentsUuid,
       });
 
-      console.log(createDepartmentAgenda);
-
       return createDetailAgenda;
     } catch (e) {
-      console.log(e);
       throw new HttpException(e.message, 500);
     }
   }
@@ -285,6 +282,191 @@ export class DetailAgendaService {
     });
 
     return dataAgenda;
+  }
+
+  async findAllHistory(
+    username: string,
+    start: string,
+    finish: string,
+    skip: string,
+    take: string,
+  ): Promise<DetailAgendums[] | any> {
+    if (!username) throw new HttpException('Username not found', 404);
+    if (!start || !finish)
+      throw new HttpException('start and finish not null', 404);
+
+    const startDate = this.parseDate(start, 'start');
+    const endDate = this.parseDate(finish, 'finish');
+    if (startDate > endDate)
+      throw new HttpException('finish must be greather from start', 400);
+
+    const findUserByUsername = await this.prisma.user.findUnique({
+      where: {
+        username,
+      },
+      select: {
+        departmentId: true,
+      },
+    });
+    if (!findUserByUsername) throw new HttpException('User not found', 404);
+
+    const departmentsAgenda = await this.prisma.departmentAgenda.findMany({
+      where: {
+        departmentId: findUserByUsername.departmentId,
+        detailAgenda: {
+          start: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+      },
+      skip: Number(skip) ?? undefined,
+      take: Number(take) ?? undefined,
+      select: {
+        detailAgenda: {
+          select: {
+            uuid: true,
+            title: true,
+            start: true,
+            finish: true,
+            isDone: true,
+            location: true,
+            typeAgenda: {
+              select: {
+                uuid: true,
+                name: true,
+              },
+            },
+            user: {
+              select: {
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const dataAgenda = [];
+    departmentsAgenda.forEach((agenda) => {
+      dataAgenda.push({
+        uuid: agenda.detailAgenda.uuid,
+        title: agenda.detailAgenda.title,
+        start: agenda.detailAgenda.start,
+        finish: agenda.detailAgenda.finish,
+        isDone: agenda.detailAgenda.isDone,
+        location: agenda.detailAgenda.location,
+        typeAgenda: {
+          uuid: agenda.detailAgenda.typeAgenda.uuid,
+        },
+        author: {
+          username: agenda.detailAgenda.user.username,
+        },
+      });
+    });
+
+    return dataAgenda;
+  }
+
+  async findAllByFilter(
+    username: string,
+    start: string,
+    finish: string,
+    typeAgenda: any,
+    skip: string,
+    take: string,
+  ): Promise<DetailAgendums[] | any> {
+    if (!username) throw new HttpException('Username not found', 404);
+
+    if (typeAgenda) {
+      typeAgenda = await this.prisma.typeAgenda.findUnique({
+        where: {
+          uuid: typeAgenda,
+        },
+        select: {
+          id: true,
+        },
+      });
+    }
+
+    const startDate = this.parseDate(start, 'start');
+    const endDate = this.parseDate(finish, 'finish');
+    if (startDate > endDate)
+      throw new HttpException('finish must be greather from start', 400);
+
+    const findUserByUsername = await this.prisma.user.findUnique({
+      where: {
+        username,
+      },
+      select: {
+        departmentId: true,
+      },
+    });
+    if (!findUserByUsername) throw new HttpException('User not found', 404);
+
+    const departmentsAgenda = await this.prisma.departmentAgenda.findMany({
+      where: {
+        departmentId: findUserByUsername.departmentId,
+        detailAgenda: {
+          start: {
+            gte: startDate,
+            lte: endDate,
+          },
+        },
+        detailAgendaId: typeAgenda ? typeAgenda.id : undefined,
+      },
+      skip: skip === undefined ? undefined : Number(skip),
+      take: take === undefined ? undefined : Number(take),
+      select: {
+        detailAgenda: {
+          select: {
+            uuid: true,
+            title: true,
+            start: true,
+            finish: true,
+            isDone: true,
+            location: true,
+            typeAgenda: {
+              select: {
+                uuid: true,
+                name: true,
+              },
+            },
+            user: {
+              select: {
+                username: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const total = await this.prisma.departmentAgenda.count({
+      where: {
+        departmentId: findUserByUsername.departmentId,
+      },
+    });
+
+    const dataAgenda = [];
+    departmentsAgenda.forEach((agenda) => {
+      dataAgenda.push({
+        uuid: agenda.detailAgenda.uuid,
+        title: agenda.detailAgenda.title,
+        start: agenda.detailAgenda.start,
+        finish: agenda.detailAgenda.finish,
+        isDone: agenda.detailAgenda.isDone,
+        location: agenda.detailAgenda.location,
+        typeAgenda: {
+          uuid: agenda.detailAgenda.typeAgenda.uuid,
+        },
+        author: {
+          username: agenda.detailAgenda.user.username,
+        },
+      });
+    });
+
+    return { dataAgenda, total };
   }
 
   async findAllByUserDepartmentV2(
@@ -395,8 +577,6 @@ export class DetailAgendaService {
     const { title, description, start, finish, isDone } =
       updateDetailAgendumDto;
 
-    console.log(files);
-
     const exist = await this.prisma.detailAgenda.findUnique({
       where: {
         uuid,
@@ -428,7 +608,6 @@ export class DetailAgendaService {
 
         return result;
       } catch (error) {
-        console.log(error);
         throw new HttpException(error.message, 500);
       }
     } else {
@@ -451,7 +630,6 @@ export class DetailAgendaService {
 
         return result;
       } catch (error) {
-        console.log(error);
         throw new HttpException(error.message, 500);
       }
     }
@@ -473,12 +651,16 @@ export class DetailAgendaService {
 
   //Helper
   private parseDate(dateString: string, fieldName: string): Date {
-    const date = parse(dateString, 'yyyy-MM-dd HH:mm:ss', new Date());
-    if (!date)
-      throw new HttpException(
-        `Invalid format for ${fieldName}, use yyyy-MM-dd HH:mm:ss`,
-        400,
-      );
-    return date;
+    try {
+      const date = parse(dateString, 'yyyy-MM-dd HH:mm:ss', new Date());
+      if (!date)
+        throw new HttpException(
+          `Invalid format for ${fieldName}, use yyyy-MM-dd HH:mm:ss`,
+          400,
+        );
+      return date;
+    } catch (e) {
+      return undefined;
+    }
   }
 }
