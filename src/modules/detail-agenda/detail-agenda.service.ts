@@ -526,6 +526,7 @@ export class DetailAgendaService {
       },
       include: {
         typeAgenda: true,
+        user: true,
       },
     });
 
@@ -559,6 +560,7 @@ export class DetailAgendaService {
         name: detailAgenda.typeAgenda.name,
       },
       departments: dataDeparments,
+      author: detailAgenda.user.username,
       isDone: detailAgenda.isDone,
       notulen: detailAgenda.notulen,
       absent: detailAgenda.absent,
