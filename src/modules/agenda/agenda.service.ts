@@ -9,6 +9,26 @@ import { CheckAgendaDto } from './dto/check-agenda.dto';
 export class AgendaService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findAllDepartmentAgenda(query?: any) {
+    let detailAgendaUuid = undefined;
+
+    if (query.detailAgendaUuid) {
+      detailAgendaUuid = await this.prisma.detailAgenda.findUnique({
+        where: { uuid: query.detailAgendaUuid },
+        select: { id: true },
+      });
+    }
+
+    const result = await this.prisma.departmentAgenda.findMany({
+      where: {
+        detailAgendaId: detailAgendaUuid ? detailAgendaUuid.id : undefined,
+      },
+    });
+    if (result.length === 0) throw new HttpException('Agenda not found', 404);
+
+    return result;
+  }
+
   async checkExistAgendaV2(chekAgendaDto: CheckAgendaDto) {
     const { departmentsUuid, start, finish } = chekAgendaDto;
 
@@ -169,6 +189,87 @@ export class AgendaService {
     return { conflict: false, lecturer: 'lecturer available' };
   }
 
+  async checkExistDepartmentAgendaForUpdate(chekAgendaDto: any) {
+    const { departmentsUuid, start, finish, detailAgendaUuid } = chekAgendaDto;
+
+    const detailAgenda = await this.prisma.detailAgenda.findUnique({
+      where: {
+        uuid: detailAgendaUuid,
+      },
+    });
+    const oldStart = detailAgenda.start;
+    const oldFinish = detailAgenda.finish;
+
+    const parseStart = parse(start, 'yyyy-MM-dd HH:mm:ss', new Date());
+    const parseFinish = parse(finish, 'yyyy-MM-dd HH:mm:ss', new Date());
+
+    if (parseStart === oldStart && parseFinish === oldFinish)
+      return { conflict: false, message: 'lecturer available' };
+
+    const getDepartmentId = await this.prisma.department.findMany({
+      where: { uuid: { in: departmentsUuid } },
+      select: { id: true },
+    });
+    if (!getDepartmentId) throw new HttpException('Department not found', 404);
+    const departmentsId = getDepartmentId.map((department) => department.id);
+
+    if (!parseStart || !parseFinish)
+      throw new HttpException(
+        'Invalid format for start and finish, use yyyy-MM-dd HH:mm:ss',
+        400,
+      );
+    if (parseFinish < parseStart)
+      throw new HttpException('finish must be greather from start', 400);
+
+    const existingDepartmentAgenda =
+      await this.prisma.departmentAgenda.findMany({
+        where: {
+          departmentId: { in: departmentsId },
+          OR: [
+            {
+              detailAgenda: {
+                start: { lt: parseFinish },
+                finish: { gt: parseStart },
+              },
+            },
+            {
+              detailAgenda: {
+                start: { gt: parseStart },
+                finish: { lt: parseFinish },
+              },
+            },
+          ],
+        },
+        include: {
+          detailAgenda: true,
+          department: true,
+        },
+      });
+    if (existingDepartmentAgenda.length === 0)
+      return { conflict: false, message: 'lecturer available' };
+
+    const response = [];
+    existingDepartmentAgenda.map((agenda) => {
+      response.push({
+        status: 'conflict',
+        detailAgenda: {
+          uuid: agenda.detailAgenda.uuid,
+          titleAgenda: agenda.detailAgenda.title,
+        },
+        department: {
+          uuid: agenda.department.uuid,
+          name: agenda.department.name,
+        },
+        start: agenda.detailAgenda.start,
+        finish: agenda.detailAgenda.finish,
+      });
+    });
+
+    if (response.length > 0) return response;
+
+    return { conflict: false, lecturer: 'lecturer available' };
+  }
+
   async createV2(createAgendaDto: CreateAgendaDto | any) {
     const { lecturerUuid, detailAgendaUuid } = createAgendaDto;
 
@@ -198,8 +299,6 @@ export class AgendaService {
         data: dataAgenda,
       });
     } catch (error) {
-      console.log(error);
-
       throw new HttpException(
         'failed create Agenda',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -250,26 +349,22 @@ export class AgendaService {
         data: dataDepartmentAgendas,
       });
     } catch (e) {
-      console.log(e);
       throw new HttpException('Failed create Agenda', 500);
     }
   }
 
-  async findAll() {
-    const result = await this.prisma.agenda.findMany();
-    if (result.length === 0) throw new HttpException('Agenda not found', 404);
-
-    return result;
-  }
-
   //Helper
   private parseDate(dateString: string, fieldName: string): Date {
-    const date = parse(dateString, 'yyyy-MM-dd HH:mm:ss', new Date());
-    if (!date)
-      throw new HttpException(
-        `Invalid format for ${fieldName}, use yyyy-MM-dd HH:mm:ss`,
-        400,
-      );
-    return date;
+    try {
+      const date = parse(dateString, 'yyyy-MM-dd HH:mm:ss', new Date());
+      if (!date)
+        throw new HttpException(
+          `Invalid format for ${fieldName}, use yyyy-MM-dd HH:mm:ss`,
+          400,
+        );
+      return date;
+    } catch (e) {
+      throw new HttpException('Invalid date format', 400);
+    }
   }
 }
