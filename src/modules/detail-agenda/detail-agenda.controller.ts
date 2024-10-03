@@ -44,9 +44,10 @@ export class DetailAgendaController {
   @ApiResponse(createDetailAgendaDoc())
   async create(@Body() createDetailAgendumDto: any): Promise<Response> {
     try {
-      const result: DetailAgendums = await this.detailAgendaService.create(
-        createDetailAgendumDto,
-      );
+      const result: DetailAgendums =
+        await this.detailAgendaService.createDetailAgenda(
+          createDetailAgendumDto,
+        );
       return Response.success(
         HttpStatus.CREATED,
         'Success create detail agenda',
@@ -62,7 +63,7 @@ export class DetailAgendaController {
 
   @Version('1')
   @Get('filter')
-  async findAllByFilter(
+  async findAllDetailAgendaByFilter(
     @Query('username') username: string,
     @Query('start') start?: string,
     @Query('finish') finish?: string,
@@ -71,7 +72,7 @@ export class DetailAgendaController {
     @Query('take') take?: string,
   ): Promise<Response> {
     try {
-      const result = await this.detailAgendaService.findAllByFilter(
+      const result = await this.detailAgendaService.findAllDetailAgendaByFilter(
         username,
         start,
         finish,
@@ -116,9 +117,9 @@ export class DetailAgendaController {
 
   @Version('1')
   @Get('all')
-  async findAllAll(): Promise<Response> {
+  async findAllDetailAgenda(): Promise<Response> {
     try {
-      const result = await this.detailAgendaService.findAll();
+      const result = await this.detailAgendaService.findAllDetailAgenda();
       return Response.success(
         HttpStatus.OK,
         'Success get all detail agenda',
@@ -135,10 +136,10 @@ export class DetailAgendaController {
   @Version('1')
   @Get(':uuid')
   @ApiResponse(findOneDetailAgendaDoc())
-  async findOne(@Param('uuid') uuid: string): Promise<Response> {
+  async findOneDetailAgenda(@Param('uuid') uuid: string): Promise<Response> {
     try {
       const result: DetailAgendum =
-        await this.detailAgendaService.findOne(uuid);
+        await this.detailAgendaService.findOneDetailAgenda(uuid);
       return Response.success(
         HttpStatus.OK,
         'Success get detail agenda',
@@ -169,7 +170,7 @@ export class DetailAgendaController {
       new FileUploadInterceptor().createMulterOptions(),
     ),
   )
-  async update(
+  async updateDetailAgenda(
     @Param('uuid') uuid: string,
     @Body() updateDetailAgendumDto: UpdateDetailAgendumDto,
     @UploadedFiles()
@@ -179,7 +180,7 @@ export class DetailAgendaController {
     },
   ): Promise<Response> {
     try {
-      const result = await this.detailAgendaService.update(
+      const result = await this.detailAgendaService.updateDetailAgenda(
         uuid,
         updateDetailAgendumDto,
         files,
@@ -199,9 +200,10 @@ export class DetailAgendaController {
 
   @Version('1')
   @Delete(':uuid')
-  async remove(@Param('uuid') uuid: string): Promise<Response> {
+  async removeDetailAgenda(@Param('uuid') uuid: string): Promise<Response> {
     try {
-      const result: string = await this.detailAgendaService.remove(uuid);
+      const result: string =
+        await this.detailAgendaService.removeDetailAgenda(uuid);
       return Response.success(
         HttpStatus.OK,
         'Success delete detail agenda',
