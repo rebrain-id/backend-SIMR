@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   UseGuards,
   Version,
 } from '@nestjs/common';
@@ -25,11 +26,29 @@ import { Roles } from 'src/guards/roles.decorator';
 export class AgendaController {
   constructor(private readonly agendaService: AgendaService) {}
 
+  @Version('1')
+  @Get('filter')
+  async findAllDepartmentAgendaByFilter(
+    @Query() query: { departmentUuid?: string; detailAgendaUuid?: string },
+  ) {
+    try {
+      const result = await this.agendaService.findAllDepartmentAgenda(query);
+      return Response.success(HttpStatus.OK, 'Success get all agenda', result);
+    } catch (error) {
+      throw Response.error(
+        error.status,
+        error.message || 'Failed get all agenda',
+      );
+    }
+  }
+
   @HttpCode(HttpStatus.OK)
   @Version('1')
   @Post('check')
   @ApiResponse(checkExistAgenda())
-  async checkExistAgenda(@Body() checkAgendaDto: CheckAgendaDto) {
+  async checkExistAgendaDepartmentAgenda(
+    @Body() checkAgendaDto: CheckAgendaDto,
+  ) {
     try {
       const result = await this.agendaService.checkExistAgenda(checkAgendaDto);
       return Response.success(
@@ -46,6 +65,22 @@ export class AgendaController {
   }
 
   @Version('1')
+  @Post('check-update')
+  async checkForUpdateDepartmentAgenda(@Body() checkAgendaDto: any) {
+    try {
+      const result =
+        await this.agendaService.checkExistDepartmentAgendaForUpdate(
+          checkAgendaDto,
+        );
+      return Response.success(
+        HttpStatus.OK,
+        'Success check exist agenda',
+        result,
+      );
+    } catch (e) {}
+  }
+
+  @Version('1')
   @Post()
   async create(@Body() createAgendaDto: CreateAgendaDto) {
     try {
@@ -59,20 +94,6 @@ export class AgendaController {
       throw Response.error(
         error.status,
         error.message || 'Failed create agenda',
-      );
-    }
-  }
-
-  @Version('1')
-  @Get()
-  async findAll() {
-    try {
-      const result = await this.agendaService.findAll();
-      return Response.success(HttpStatus.OK, 'Success get all agenda', result);
-    } catch (error) {
-      throw Response.error(
-        error.status,
-        error.message || 'Failed get all agenda',
       );
     }
   }
