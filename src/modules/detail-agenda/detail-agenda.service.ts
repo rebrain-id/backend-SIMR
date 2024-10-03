@@ -1,6 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { CreateDetailAgendumDto } from './dto/create-detail-agendum.dto';
-import { UpdateDetailAgendumDto } from './dto/update-detail-agendum.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   DetailAgendums,
@@ -152,7 +151,7 @@ export class DetailAgendaService {
     }
   }
 
-  async create(createDetailAgendumDto: any): Promise<any> {
+  async createDetailAgenda(createDetailAgendumDto: any): Promise<any> {
     const {
       title,
       description,
@@ -211,7 +210,7 @@ export class DetailAgendaService {
     }
   }
 
-  async findAll() {
+  async findAllDetailAgenda() {
     const detailAgenda = await this.prisma.detailAgenda.findMany({});
     return detailAgenda;
   }
@@ -368,7 +367,7 @@ export class DetailAgendaService {
     return dataAgenda;
   }
 
-  async findAllByFilter(
+  async findAllDetailAgendaByFilter(
     username: string,
     start: string,
     finish: string,
@@ -519,7 +518,7 @@ export class DetailAgendaService {
     return response;
   }
 
-  async findOne(uuid: string): Promise<any> {
+  async findOneDetailAgenda(uuid: string): Promise<any> {
     const detailAgenda = await this.prisma.detailAgenda.findUnique({
       where: {
         uuid,
@@ -571,12 +570,8 @@ export class DetailAgendaService {
     return response;
   }
 
-  async update(
-    uuid: string,
-    updateDetailAgendumDto: UpdateDetailAgendumDto,
-    files,
-  ) {
-    const { title, description, start, finish, isDone } =
+  async updateDetailAgenda(uuid: string, updateDetailAgendumDto: any, files) {
+    const { title, description, start, finish, isDone, departmentsUuid } =
       updateDetailAgendumDto;
 
     const exist = await this.prisma.detailAgenda.findUnique({
@@ -586,7 +581,7 @@ export class DetailAgendaService {
     });
     if (!exist) throw new HttpException('Detail Agenda not found', 404);
 
-    if (!start || !finish) {
+    if (start && finish) {
       const startDate = this.parseDate(start, 'start');
       const endDate = this.parseDate(finish, 'finish');
 
@@ -604,6 +599,35 @@ export class DetailAgendaService {
             notulen: files?.notulen?.[0]?.filename || undefined,
             absent: files?.absent?.[0]?.filename || undefined,
           },
+        });
+
+        await this.prisma.departmentAgenda.deleteMany({
+          where: {
+            detailAgendaId: exist.id,
+          },
+        });
+
+        const getDepartments = await this.prisma.department.findMany({
+          where: {
+            uuid: {
+              in: departmentsUuid,
+            },
+          },
+        });
+        const getIdDepartments = getDepartments.map(
+          (department) => department.id,
+        );
+
+        const dataForCreateDepartmentAgenda = [];
+        getIdDepartments.forEach((id) => {
+          dataForCreateDepartmentAgenda.push({
+            departmentId: id,
+            detailAgendaId: result.id,
+          });
+        });
+
+        await this.prisma.departmentAgenda.createMany({
+          data: dataForCreateDepartmentAgenda,
         });
 
         if (!result) throw new HttpException('internal server error', 500);
@@ -637,7 +661,7 @@ export class DetailAgendaService {
     }
   }
 
-  async remove(uuid: string) {
+  async removeDetailAgenda(uuid: string) {
     const exists = await this.prisma.detailAgenda.findUnique({
       where: { uuid },
     });
