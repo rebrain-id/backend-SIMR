@@ -6,12 +6,15 @@ import {
   Department,
   selectedFieldDepartment,
 } from './entities/department.entity';
+import { QueryDepartmentDto } from './dto/query-department.dto';
 
 @Injectable()
 export class DepartmentService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
+  async createDepartment(
+    createDepartmentDto: CreateDepartmentDto,
+  ): Promise<Department> {
     const { name } = createDepartmentDto;
 
     const exists = await this.prisma.department.findFirst({
@@ -36,24 +39,22 @@ export class DepartmentService {
     }
   }
 
-  async findAll(query: {
-    name?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ result: Department[]; totalData: number }> {
+  async findAllDepartment(
+    query: QueryDepartmentDto,
+  ): Promise<{ result: Department[]; totalData: number }> {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const offset = (page - 1) * limit;
 
     const totalData = await this.prisma.department.count({
       where: {
-        name: query.name ? { equals: query.name } : { contains: '' },
+        name: query.name ? { contains: query.name } : { contains: '' },
       },
     });
 
     const result = await this.prisma.department.findMany({
       where: {
-        name: query.name ? { equals: query.name } : { contains: '' },
+        name: query.name ? { contains: query.name } : { contains: '' },
       },
       skip: offset,
       take: limit,
@@ -71,7 +72,7 @@ export class DepartmentService {
     }
   }
 
-  async findOne(uuid: string): Promise<Department> {
+  async findOneDepartment(uuid: string): Promise<Department> {
     const result = await this.prisma.department.findUnique({
       where: {
         uuid,
@@ -90,7 +91,7 @@ export class DepartmentService {
     }
   }
 
-  async update(
+  async updateDepartment(
     uuid: string,
     updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<Department> {
@@ -117,7 +118,7 @@ export class DepartmentService {
     }
   }
 
-  async remove(uuid: string): Promise<string> {
+  async removeDepartment(uuid: string): Promise<string> {
     const exists: Department = await this.prisma.department.findUnique({
       where: { uuid },
     });

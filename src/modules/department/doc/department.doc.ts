@@ -41,6 +41,7 @@ export class DepartmentDocs {
             updatedAt: '2024-08-29T15:55:30.638Z',
           },
         ],
+        totalData: 2,
       },
     };
   }
