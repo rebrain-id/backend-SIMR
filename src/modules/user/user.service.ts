@@ -5,6 +5,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { selectedFieldUser, User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
+import { QueryUserDto } from './dto/query-user.dto';
 
 @Injectable()
 export class UserService {
@@ -47,13 +48,9 @@ export class UserService {
     }
   }
 
-  async findAll(query: {
-    username?: string;
-    department?: string;
-    role?: Role;
-    page?: number;
-    limit?: number;
-  }): Promise<{ result: User[]; totalData: number }> {
+  async findAllUsers(
+    query: QueryUserDto,
+  ): Promise<{ result: User[]; totalData: number }> {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -100,9 +97,9 @@ export class UserService {
     }
   }
 
-  async findOne(username: string): Promise<User> {
+  async findOneUser(usernameParam: string): Promise<User> {
     const result = await this.prisma.user.findUnique({
-      where: { username },
+      where: { username: usernameParam },
       select: selectedFieldUser(),
     });
 
@@ -117,22 +114,22 @@ export class UserService {
     }
   }
 
-  async update(
-    userUsername: string,
+  async updateUser(
+    usernameParam: string,
     updateUserDto: UpdateUserDto,
   ): Promise<User> {
     const { username, oldPassword, newPassword, departmentUuid, role } =
       updateUserDto;
 
     const user = await this.prisma.user.findUnique({
-      where: { username: userUsername },
+      where: { username: usernameParam },
     });
 
     if (!user) {
       throw new HttpException('User not found', 404);
     }
 
-    if (username && userUsername === username) {
+    if (username && usernameParam === username) {
       throw new HttpException('Username cannot be same', 400);
     }
 
@@ -172,7 +169,7 @@ export class UserService {
 
     try {
       const updatedUser = await this.prisma.user.update({
-        where: { username: userUsername },
+        where: { username: usernameParam },
         data: {
           username: user.username,
           password: user.password,
@@ -188,18 +185,18 @@ export class UserService {
     }
   }
 
-  async remove(username: string): Promise<string> {
+  async removeUser(usernameParam: string): Promise<string> {
     const exists: User = await this.prisma.user.findUnique({
-      where: { username },
+      where: { username: usernameParam },
     });
 
     if (!exists) throw new HttpException('User not found', 404);
 
     try {
       await this.prisma.user.delete({
-        where: { username },
+        where: { username: usernameParam },
       });
-      return 'Success delete user with username: ' + username;
+      return 'Success delete user with username: ' + usernameParam;
     } catch (error) {
       throw new HttpException('Failed delete User', 500);
     }

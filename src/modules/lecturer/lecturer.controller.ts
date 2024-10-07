@@ -16,10 +16,11 @@ import { CreateLecturerDto } from './dto/create-lecturer.dto';
 import { UpdateLecturerDto } from './dto/update-lecturer.dto';
 import { Response } from '../../helper/response';
 import { LecturerDocs } from './doc/lecturer.doc';
-import { ApiParam, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
+import { QueryLecturerDto } from './dto/query-lecturer.dto';
 
 @ApiTags('Lecturer')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -35,7 +36,8 @@ export class LecturerController {
     @Body() createLecturerDto: CreateLecturerDto,
   ): Promise<Response> {
     try {
-      const result = await this.lecturerService.create(createLecturerDto);
+      const result =
+        await this.lecturerService.createLecturer(createLecturerDto);
       return Response.success(
         HttpStatus.CREATED,
         'Success create lecturer',
@@ -51,20 +53,11 @@ export class LecturerController {
 
   @Version('1')
   @Get()
-  @ApiQuery(LecturerDocs.queryDepartment())
-  @ApiQuery(LecturerDocs.queryName())
   @ApiResponse(LecturerDocs.findAllResponse())
-  async findAll(
-    @Query()
-    query: {
-      department?: string;
-      name?: string;
-      page?: number;
-      limit?: number;
-    },
-  ): Promise<Response> {
+  async findAll(@Query() query: QueryLecturerDto): Promise<Response> {
     try {
-      const { result, totalData } = await this.lecturerService.findAll(query);
+      const { result, totalData } =
+        await this.lecturerService.findAllLecturer(query);
       return Response.success(
         HttpStatus.OK,
         'Success get all lecturers',
@@ -85,7 +78,7 @@ export class LecturerController {
   @ApiResponse(LecturerDocs.findOneResponse())
   async findOne(@Param('uuid') uuid: string) {
     try {
-      const result = await this.lecturerService.findOne(uuid);
+      const result = await this.lecturerService.findOneLecturer(uuid);
       return Response.success(HttpStatus.OK, 'Success get lecturer', result);
     } catch (error) {
       throw Response.error(
@@ -104,7 +97,10 @@ export class LecturerController {
     @Body() updateLecturerDto: UpdateLecturerDto,
   ) {
     try {
-      const result = await this.lecturerService.update(uuid, updateLecturerDto);
+      const result = await this.lecturerService.updateLecturer(
+        uuid,
+        updateLecturerDto,
+      );
       return Response.success(HttpStatus.OK, 'Success update lecturer', result);
     } catch (error) {
       throw Response.error(
@@ -120,7 +116,7 @@ export class LecturerController {
   @ApiResponse(LecturerDocs.removeResponse())
   async remove(@Param('uuid') uuid: string) {
     try {
-      const result = await this.lecturerService.remove(uuid);
+      const result = await this.lecturerService.removeLecturer(uuid);
       return Response.success(HttpStatus.OK, 'Success delete lecturer', result);
     } catch (error) {
       throw Response.error(

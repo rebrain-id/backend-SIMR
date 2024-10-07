@@ -1,17 +1,25 @@
-import { IsNotEmpty, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateLecturerDto {
-  @ApiProperty({ example: 'Sang Surya' })
+  @ApiProperty({ description: 'Lecturer name', example: 'Sang Surya' })
   @IsNotEmpty()
   @IsString()
   name: string;
 
-  @ApiProperty({ example: 'sangsurya@gmail.com' })
+  @ApiPropertyOptional({
+    description: 'Lecturer email',
+    example: 'sangsurya@gmail.com',
+  })
+  @IsOptional()
   @IsString()
   email: string;
 
-  @ApiProperty({ example: '08123456789' })
+  @ApiPropertyOptional({
+    description: 'Lecturer phone number',
+    example: '08123456789',
+  })
+  @IsOptional()
   @IsString()
   phoneNumber: string;
 

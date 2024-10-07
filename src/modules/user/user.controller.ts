@@ -18,14 +18,16 @@ import { Response } from '../../helper/response';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
-import { ApiTags } from '@nestjs/swagger';
-import { Role } from '@prisma/client';
+import { ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserDocs } from './doc/user.doc';
+import { QueryUserDto } from './dto/query-user.dto';
 
 @ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiResponse(UserDocs.register())
   @Version('1')
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto): Promise<Response> {
@@ -41,22 +43,14 @@ export class UserController {
     }
   }
 
+  @ApiResponse(UserDocs.findAll())
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PRODI')
   @Get()
-  async findAll(
-    @Query()
-    query: {
-      username?: string;
-      department?: string;
-      role?: Role;
-      page?: number;
-      limit?: number;
-    },
-  ) {
+  async findAll(@Query() query: QueryUserDto) {
     try {
-      const { result, totalData } = await this.userService.findAll(query);
+      const { result, totalData } = await this.userService.findAllUsers(query);
       return Response.success(
         HttpStatus.OK,
         'Success get all users',
@@ -71,19 +65,23 @@ export class UserController {
     }
   }
 
+  @ApiResponse(UserDocs.findOne())
+  @ApiParam(UserDocs.userParam())
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PRODI')
   @Get(':username')
   async findOne(@Param('username') username: string) {
     try {
-      const result = await this.userService.findOne(username);
+      const result = await this.userService.findOneUser(username);
       return Response.success(HttpStatus.OK, 'Success get user', result);
     } catch (error) {
       throw Response.error(error.status, error.message || 'Failed get user');
     }
   }
 
+  @ApiResponse(UserDocs.update())
+  @ApiParam(UserDocs.userParam())
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PRODI')
@@ -93,20 +91,24 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<Response> {
     try {
-      const result = await this.userService.update(username, updateUserDto);
+      const result = await this.userService.updateUser(username, updateUserDto);
       return Response.success(HttpStatus.OK, 'Success update user', result);
     } catch (error) {
       throw Response.error(error.status, error.message || 'Failed update user');
     }
   }
 
+  @ApiResponse(UserDocs.remove())
+  @ApiParam(UserDocs.userParam())
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PRODI')
   @Delete(':username')
   async remove(@Param('username') username: string) {
+    console.log(username);
+
     try {
-      const result = await this.userService.remove(username);
+      const result = await this.userService.removeUser(username);
       return Response.success(HttpStatus.OK, 'Success delete user', result);
     } catch (error) {
       throw Response.error(error.status, error.message || 'Failed delete user');
