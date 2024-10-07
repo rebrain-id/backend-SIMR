@@ -62,24 +62,22 @@ export class DetailAgendaController {
   }
 
   @Version('1')
-  @Get('filter')
+  @Get()
   async findAllDetailAgendaByFilter(
-    @Query('username') username: string,
-    @Query('start') start?: string,
-    @Query('finish') finish?: string,
-    @Query('type-agenda') typeAgenda?: string,
-    @Query('skip') skip?: string,
-    @Query('take') take?: string,
+    @Query()
+    query: {
+      username: string;
+      keyword?: string;
+      start?: string;
+      finish?: string;
+      typeAgenda?: string;
+      page?: string;
+      limit?: string;
+    },
   ): Promise<Response> {
     try {
-      const result = await this.detailAgendaService.findAllDetailAgendaByFilter(
-        username,
-        start,
-        finish,
-        typeAgenda,
-        skip,
-        take,
-      );
+      const result =
+        await this.detailAgendaService.findAllDetailAgendaByFilter(query);
       return Response.success(
         HttpStatus.OK,
         'Success get all detail agenda',

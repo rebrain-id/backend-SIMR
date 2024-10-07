@@ -367,14 +367,21 @@ export class DetailAgendaService {
     return dataAgenda;
   }
 
-  async findAllDetailAgendaByFilter(
-    username: string,
-    start: string,
-    finish: string,
-    typeAgenda: any,
-    skip: string,
-    take: string,
-  ): Promise<DetailAgendums[] | any> {
+  async findAllDetailAgendaByFilter(query: {
+    username: string;
+    keyword?: string;
+    start?: string;
+    finish?: string;
+    typeAgenda?: any;
+    page?: string;
+    limit?: string;
+  }): Promise<DetailAgendums[] | any> {
+    // eslint-disable-next-line prefer-const
+    let { username, start, finish, typeAgenda, keyword } = query;
+    const page = Number(query.page) ?? 1;
+    const limit = Number(query.limit) ?? 10;
+    const offset = (page - 1) * limit;
+
     if (!username) throw new HttpException('Username not found', 404);
 
     if (typeAgenda) {
@@ -407,6 +414,9 @@ export class DetailAgendaService {
       where: {
         departmentId: findUserByUsername.departmentId,
         detailAgenda: {
+          title: {
+            contains: keyword,
+          },
           start: {
             gte: startDate,
             lte: endDate,
@@ -414,8 +424,13 @@ export class DetailAgendaService {
         },
         detailAgendaId: typeAgenda ? typeAgenda.id : undefined,
       },
-      skip: skip === undefined ? undefined : Number(skip),
-      take: take === undefined ? undefined : Number(take),
+      orderBy: {
+        detailAgenda: {
+          id: 'desc',
+        },
+      },
+      skip: offset,
+      take: limit,
       select: {
         detailAgenda: {
           select: {
