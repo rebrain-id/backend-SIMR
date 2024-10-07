@@ -20,6 +20,7 @@ import { DepartmentDocs } from './doc/department.doc';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
+import { QueryDepartmentDto } from './dto/query-department.dto';
 
 @ApiTags('Department')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -35,7 +36,8 @@ export class DepartmentController {
     @Body() createDepartmentDto: CreateDepartmentDto,
   ): Promise<Response> {
     try {
-      const result = await this.departmentService.create(createDepartmentDto);
+      const result =
+        await this.departmentService.createDepartment(createDepartmentDto);
       return Response.success(
         HttpStatus.CREATED,
         'Success create department',
@@ -52,11 +54,10 @@ export class DepartmentController {
   @Version('1')
   @Get()
   @ApiResponse(DepartmentDocs.findAllResponse())
-  async findAll(
-    @Query() query: { name?: string; page?: number; limit?: number },
-  ): Promise<Response> {
+  async findAll(@Query() query: QueryDepartmentDto): Promise<Response> {
     try {
-      const { result, totalData } = await this.departmentService.findAll(query);
+      const { result, totalData } =
+        await this.departmentService.findAllDepartment(query);
       return Response.success(
         HttpStatus.OK,
         'Success get all departments',
@@ -75,9 +76,9 @@ export class DepartmentController {
   @Get(':uuid')
   @ApiParam(DepartmentDocs.params())
   @ApiResponse(DepartmentDocs.findOneResponse())
-  async findOne(@Param('uuid') id: string) {
+  async findOne(@Param('uuid') uuid: string) {
     try {
-      const result = await this.departmentService.findOne(id);
+      const result = await this.departmentService.findOneDepartment(uuid);
       return Response.success(HttpStatus.OK, 'Success get department', result);
     } catch (error) {
       throw Response.error(
@@ -96,7 +97,7 @@ export class DepartmentController {
     @Body() updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<Response> {
     try {
-      const result = await this.departmentService.update(
+      const result = await this.departmentService.updateDepartment(
         uuid,
         updateDepartmentDto,
       );
@@ -119,7 +120,7 @@ export class DepartmentController {
   @ApiResponse(DepartmentDocs.deleteResponse())
   async remove(@Param('uuid') uuid: string) {
     try {
-      const result = await this.departmentService.remove(uuid);
+      const result = await this.departmentService.removeDepartment(uuid);
       return Response.success(
         HttpStatus.OK,
         'Success delete department',

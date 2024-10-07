@@ -3,12 +3,15 @@ import { CreateLecturerDto } from './dto/create-lecturer.dto';
 import { UpdateLecturerDto } from './dto/update-lecturer.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Lecturer, selectedFieldLecturer } from './entities/lecturer.entity';
+import { QueryLecturerDto } from './dto/query-lecturer.dto';
 
 @Injectable()
 export class LecturerService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createLecturerDto: CreateLecturerDto): Promise<Lecturer> {
+  async createLecturer(
+    createLecturerDto: CreateLecturerDto,
+  ): Promise<Lecturer> {
     const { name, email, phoneNumber, departmentUuid } = createLecturerDto;
 
     const exists = await this.prisma.lecturer.findFirst({
@@ -44,12 +47,9 @@ export class LecturerService {
     }
   }
 
-  async findAll(query: {
-    department?: string;
-    name?: string;
-    page?: number;
-    limit?: number;
-  }): Promise<{ result: Lecturer[]; totalData: number }> {
+  async findAllLecturer(
+    query: QueryLecturerDto,
+  ): Promise<{ result: Lecturer[]; totalData: number }> {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -86,7 +86,7 @@ export class LecturerService {
     }
   }
 
-  async findOne(uuid: string): Promise<Lecturer> {
+  async findOneLecturer(uuid: string): Promise<Lecturer> {
     const result = await this.prisma.lecturer.findUnique({
       where: {
         uuid,
@@ -105,7 +105,7 @@ export class LecturerService {
     }
   }
 
-  async update(
+  async updateLecturer(
     uuid: string,
     updateLecturerDto: UpdateLecturerDto,
   ): Promise<Lecturer> {
@@ -145,7 +145,7 @@ export class LecturerService {
     }
   }
 
-  async remove(uuid: string): Promise<string> {
+  async removeLecturer(uuid: string): Promise<string> {
     const exists = await this.prisma.lecturer.findUnique({
       where: { uuid },
     });
