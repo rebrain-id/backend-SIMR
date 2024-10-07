@@ -92,7 +92,7 @@ export class DetailAgendaController {
     }
   }
   @Version('1')
-  @Get()
+  @Get('department')
   @ApiResponse(findAllDetailAgendaDoc())
   async findAllByDepartment(
     @Query('username') username: string,
