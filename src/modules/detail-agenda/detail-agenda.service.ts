@@ -378,8 +378,8 @@ export class DetailAgendaService {
   }): Promise<DetailAgendums[] | any> {
     // eslint-disable-next-line prefer-const
     let { username, start, finish, typeAgenda, keyword } = query;
-    const page = Number(query.page) ?? 1;
-    const limit = Number(query.limit) ?? 10;
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
     const offset = (page - 1) * limit;
 
     if (!username) throw new HttpException('Username not found', 404);
