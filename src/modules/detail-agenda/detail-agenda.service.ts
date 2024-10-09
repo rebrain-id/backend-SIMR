@@ -664,7 +664,35 @@ export class DetailAgendaService {
             notulen: files?.notulen?.[0]?.filename || undefined,
             absent: files?.absent?.[0]?.filename || undefined,
           },
-          select: selectedFieldDetailAgenda(),
+        });
+
+        await this.prisma.departmentAgenda.deleteMany({
+          where: {
+            detailAgendaId: exist.id,
+          },
+        });
+
+        const getDepartments = await this.prisma.department.findMany({
+          where: {
+            uuid: {
+              in: departmentsUuid,
+            },
+          },
+        });
+        const getIdDepartments = getDepartments.map(
+          (department) => department.id,
+        );
+
+        const dataForCreateDepartmentAgenda = [];
+        getIdDepartments.forEach((id) => {
+          dataForCreateDepartmentAgenda.push({
+            departmentId: id,
+            detailAgendaId: result.id,
+          });
+        });
+
+        await this.prisma.departmentAgenda.createMany({
+          data: dataForCreateDepartmentAgenda,
         });
 
         if (!result) throw new HttpException('internal server error', 500);
