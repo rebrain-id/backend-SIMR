@@ -77,7 +77,13 @@ export class AgendaController {
         'Success check exist agenda',
         result,
       );
-    } catch (e) {}
+    } catch (error) {
+      console.log(error);
+      throw Response.error(
+        error.status,
+        error.message || 'Failed create agenda',
+      );
+    }
   }
 
   @Version('1')
