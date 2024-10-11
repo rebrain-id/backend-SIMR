@@ -192,82 +192,87 @@ export class AgendaService {
   async checkExistDepartmentAgendaForUpdate(chekAgendaDto: any) {
     const { departmentsUuid, start, finish, detailAgendaUuid } = chekAgendaDto;
 
-    const detailAgenda = await this.prisma.detailAgenda.findUnique({
-      where: {
-        uuid: detailAgendaUuid,
-      },
-    });
-    const oldStart = detailAgenda.start;
-    const oldFinish = detailAgenda.finish;
-
-    const parseStart = parse(start, 'yyyy-MM-dd HH:mm:ss', new Date());
-    const parseFinish = parse(finish, 'yyyy-MM-dd HH:mm:ss', new Date());
-
-    if (parseStart === oldStart && parseFinish === oldFinish)
-      return { conflict: false, message: 'lecturer available' };
-
-    const getDepartmentId = await this.prisma.department.findMany({
-      where: { uuid: { in: departmentsUuid } },
-      select: { id: true },
-    });
-    if (!getDepartmentId) throw new HttpException('Department not found', 404);
-    const departmentsId = getDepartmentId.map((department) => department.id);
-
-    if (!parseStart || !parseFinish)
-      throw new HttpException(
-        'Invalid format for start and finish, use yyyy-MM-dd HH:mm:ss',
-        400,
-      );
-    if (parseFinish < parseStart)
-      throw new HttpException('finish must be greather from start', 400);
-
-    const existingDepartmentAgenda =
-      await this.prisma.departmentAgenda.findMany({
+    try {
+      const detailAgenda = await this.prisma.detailAgenda.findUnique({
         where: {
-          departmentId: { in: departmentsId },
-          OR: [
-            {
-              detailAgenda: {
-                start: { lt: parseFinish },
-                finish: { gt: parseStart },
-              },
-            },
-            {
-              detailAgenda: {
-                start: { gt: parseStart },
-                finish: { lt: parseFinish },
-              },
-            },
-          ],
-        },
-        include: {
-          detailAgenda: true,
-          department: true,
+          uuid: detailAgendaUuid,
         },
       });
-    if (existingDepartmentAgenda.length === 0)
-      return { conflict: false, message: 'lecturer available' };
+      const oldStart = detailAgenda.start;
+      const oldFinish = detailAgenda.finish;
 
-    const response = [];
-    existingDepartmentAgenda.map((agenda) => {
-      response.push({
-        status: 'conflict',
-        detailAgenda: {
-          uuid: agenda.detailAgenda.uuid,
-          titleAgenda: agenda.detailAgenda.title,
-        },
-        department: {
-          uuid: agenda.department.uuid,
-          name: agenda.department.name,
-        },
-        start: agenda.detailAgenda.start,
-        finish: agenda.detailAgenda.finish,
+      const parseStart = parse(start, 'yyyy-MM-dd HH:mm:ss', new Date());
+      const parseFinish = parse(finish, 'yyyy-MM-dd HH:mm:ss', new Date());
+
+      if (parseStart === oldStart && parseFinish === oldFinish)
+        return { conflict: false, message: 'lecturer available' };
+
+      const getDepartmentId = await this.prisma.department.findMany({
+        where: { uuid: { in: departmentsUuid } },
+        select: { id: true },
       });
-    });
+      if (!getDepartmentId)
+        throw new HttpException('Department not found', 404);
+      const departmentsId = getDepartmentId.map((department) => department.id);
 
-    if (response.length > 0) return response;
+      if (!parseStart || !parseFinish)
+        throw new HttpException(
+          'Invalid format for start and finish, use yyyy-MM-dd HH:mm:ss',
+          400,
+        );
+      if (parseFinish < parseStart)
+        throw new HttpException('finish must be greather from start', 400);
 
-    return { conflict: false, lecturer: 'lecturer available' };
+      const existingDepartmentAgenda =
+        await this.prisma.departmentAgenda.findMany({
+          where: {
+            departmentId: { in: departmentsId },
+            OR: [
+              {
+                detailAgenda: {
+                  start: { lt: parseFinish },
+                  finish: { gt: parseStart },
+                },
+              },
+              {
+                detailAgenda: {
+                  start: { gt: parseStart },
+                  finish: { lt: parseFinish },
+                },
+              },
+            ],
+          },
+          include: {
+            detailAgenda: true,
+            department: true,
+          },
+        });
+      if (existingDepartmentAgenda.length === 0)
+        return { conflict: false, message: 'lecturer available' };
+
+      const response = [];
+      existingDepartmentAgenda.map((agenda) => {
+        response.push({
+          status: 'conflict',
+          detailAgenda: {
+            uuid: agenda.detailAgenda.uuid,
+            titleAgenda: agenda.detailAgenda.title,
+          },
+          department: {
+            uuid: agenda.department.uuid,
+            name: agenda.department.name,
+          },
+          start: agenda.detailAgenda.start,
+          finish: agenda.detailAgenda.finish,
+        });
+      });
+
+      if (response.length > 0) return response;
+
+      return { conflict: false, lecturer: 'lecturer available' };
+    } catch (e) {
+      throw new HttpException(e.message, 500);
+    }
   }
 
   async createV2(createAgendaDto: CreateAgendaDto | any) {
