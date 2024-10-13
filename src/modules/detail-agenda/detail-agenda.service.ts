@@ -395,8 +395,23 @@ export class DetailAgendaService {
       });
     }
 
-    const startDate = this.parseDate(start, 'start');
-    const endDate = this.parseDate(finish, 'finish');
+    const getDefaultStartTime = () => {
+      const date = new Date();
+      date.setUTCHours(0, 0, 0, 0);
+      return date;
+    };
+
+    const getDefaultEndTime = () => {
+      const date = new Date();
+      date.setUTCHours(23, 59, 59, 999);
+      return date;
+    };
+
+    const startDate =
+      this.parseDate(start, 'start') ?? getDefaultStartTime().toISOString();
+    const endDate =
+      this.parseDate(finish, 'finish') ?? getDefaultEndTime().toISOString();
+
     if (startDate > endDate)
       throw new HttpException('finish must be greather from start', 400);
 
@@ -405,10 +420,63 @@ export class DetailAgendaService {
         username,
       },
       select: {
+        role: true,
         departmentId: true,
       },
     });
     if (!findUserByUsername) throw new HttpException('User not found', 404);
+
+    if (findUserByUsername.role === 'FAKULTAS') {
+      const result = await this.prisma.departmentAgenda.findMany({
+        where: {
+          detailAgenda: {
+            title: {
+              contains: keyword ? keyword : '',
+            },
+            start: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+          detailAgendaId: typeAgenda ? typeAgenda.id : undefined,
+        },
+        orderBy: {
+          detailAgenda: {
+            id: 'desc',
+          },
+        },
+        skip: offset,
+        take: limit,
+        select: {
+          detailAgenda: {
+            select: {
+              uuid: true,
+              title: true,
+              start: true,
+              finish: true,
+              isDone: true,
+              location: true,
+              typeAgenda: {
+                select: {
+                  uuid: true,
+                  name: true,
+                },
+              },
+              user: {
+                select: {
+                  username: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (result.length === 0) {
+        throw new HttpException('tidak ada agenda rapat', 404);
+      }
+      return result;
+    }
 
     const departmentsAgenda = await this.prisma.departmentAgenda.findMany({
       where: {
