@@ -63,6 +63,7 @@ export class DetailAgendaController {
 
   @Version('1')
   @Get()
+  @Roles('FAKULTAS')
   async findAllDetailAgendaByFilter(
     @Query()
     query: {
