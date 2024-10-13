@@ -431,9 +431,13 @@ export class DetailAgendaService {
         where: {
           detailAgenda: {
             title: {
-              contains: keyword ? keyword : '',
+              contains: keyword === undefined ? '' : keyword,
             },
             start: {
+              gte: startDate,
+              lte: endDate,
+            },
+            finish: {
               gte: startDate,
               lte: endDate,
             },
@@ -475,7 +479,10 @@ export class DetailAgendaService {
       if (result.length === 0) {
         throw new HttpException('tidak ada agenda rapat', 404);
       }
-      return result;
+
+      console.log(result);
+      const countDetailAgenda = await this.prisma.detailAgenda.count();
+      return { dataAgenda: result, total: countDetailAgenda };
     }
 
     const departmentsAgenda = await this.prisma.departmentAgenda.findMany({
