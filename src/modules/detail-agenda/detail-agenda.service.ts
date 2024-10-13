@@ -654,8 +654,22 @@ export class DetailAgendaService {
   }
 
   async updateDetailAgenda(uuid: string, updateDetailAgendumDto: any, files) {
-    const { title, description, start, finish, isDone, departmentsUuid } =
-      updateDetailAgendumDto;
+    const {
+      title,
+      description,
+      start,
+      finish,
+      isDone,
+      departmentsUuid,
+      typeAgendaUuid,
+    } = updateDetailAgendumDto;
+
+    const getTypeAgenda = await this.prisma.typeAgenda.findUnique({
+      where: {
+        uuid: typeAgendaUuid,
+      },
+    });
+    if (!getTypeAgenda) throw new HttpException('Type Agenda not found', 404);
 
     const exist = await this.prisma.detailAgenda.findUnique({
       where: {
@@ -678,6 +692,7 @@ export class DetailAgendaService {
             description,
             start: startDate,
             finish: endDate,
+            typeAgendaId: getTypeAgenda.id,
             isDone: Boolean(isDone),
             notulen: files?.notulen?.[0]?.filename || undefined,
             absent: files?.absent?.[0]?.filename || undefined,
