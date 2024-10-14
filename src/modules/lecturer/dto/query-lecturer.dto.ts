@@ -4,6 +4,14 @@ import { IsInt, IsOptional, IsString } from 'class-validator';
 
 export class QueryLecturerDto {
   @ApiPropertyOptional({
+    description: 'Filter by username',
+    example: 'babayo',
+  })
+  @IsOptional()
+  @IsString()
+  username?: string;
+
+  @ApiPropertyOptional({
     description: 'Filter by lecturer name',
     example: 'Sang Surya',
   })

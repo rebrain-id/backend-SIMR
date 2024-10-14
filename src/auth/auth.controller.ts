@@ -37,7 +37,7 @@ export class AuthController {
 
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('PRODI')
+  @Roles('FAKULTAS', 'PRODI')
   @Post('get-access')
   async refreshToken(
     @Body('refreshToken') refreshToken: string,
@@ -52,7 +52,7 @@ export class AuthController {
 
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('PRODI')
+  @Roles('FAKULTAS', 'PRODI')
   @Post('logout/:username')
   async logout(@Param('username') username: string): Promise<Response> {
     try {

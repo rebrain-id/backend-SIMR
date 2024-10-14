@@ -24,7 +24,7 @@ import { QueryDepartmentDto } from './dto/query-department.dto';
 
 @ApiTags('Department')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PRODI')
+@Roles('FAKULTAS', 'PRODI')
 @Controller('department')
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {}

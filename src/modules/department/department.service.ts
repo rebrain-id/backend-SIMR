@@ -46,29 +46,65 @@ export class DepartmentService {
     const limit = Number(query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    const totalData = await this.prisma.department.count({
+    if (!query.username) {
+      throw new HttpException('Username is required', 400);
+    }
+
+    const user = await this.prisma.user.findUnique({
       where: {
-        name: query.name ? { contains: query.name } : { contains: '' },
+        username: query.username,
+      },
+      select: {
+        role: true,
+        departmentId: true,
       },
     });
 
-    const result = await this.prisma.department.findMany({
-      where: {
-        name: query.name ? { contains: query.name } : { contains: '' },
-      },
-      skip: offset,
-      take: limit,
-      select: selectedFieldDepartment(),
-    });
+    if (!user) {
+      throw new HttpException('User not found', 404);
+    }
 
-    if (result.length === 0) {
+    let totalData: number;
+    let result: Department[];
+
+    if (user.role === 'FAKULTAS') {
+      totalData = await this.prisma.department.count({
+        where: {
+          name: query.name ? { contains: query.name } : { contains: '' },
+        },
+      });
+
+      result = await this.prisma.department.findMany({
+        where: {
+          name: query.name ? { contains: query.name } : { contains: '' },
+        },
+        skip: offset,
+        take: limit,
+        select: selectedFieldDepartment(),
+      });
+    } else if (user.role === 'PRODI') {
+      totalData = await this.prisma.department.count({
+        where: {
+          id: user.departmentId,
+        },
+      });
+
+      result = await this.prisma.department.findMany({
+        where: {
+          id: user.departmentId,
+        },
+        select: selectedFieldDepartment(),
+      });
+    }
+
+    if (!result) {
       throw new HttpException('Department not found', 404);
     }
 
     try {
       return { result, totalData };
     } catch (error) {
-      throw new HttpException('Failed get all Department', 500);
+      throw new HttpException('Failed to get all Department', 500);
     }
   }
 

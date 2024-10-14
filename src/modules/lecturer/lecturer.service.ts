@@ -54,28 +54,64 @@ export class LecturerService {
     const limit = Number(query.limit) || 10;
     const offset = (page - 1) * limit;
 
-    const totalData = await this.prisma.lecturer.count({
+    if (!query.username) {
+      throw new HttpException('Username is required', 400);
+    }
+
+    const user = await this.prisma.user.findUnique({
       where: {
-        name: query.name ? { equals: query.name } : { contains: '' },
-        department: query.department
-          ? { name: { equals: query.department } }
-          : { name: { contains: '' } },
+        username: query.username,
+      },
+      select: {
+        role: true,
+        departmentId: true,
       },
     });
 
-    const result = await this.prisma.lecturer.findMany({
-      where: {
-        name: query.name ? { equals: query.name } : { contains: '' },
-        department: query.department
-          ? { name: { equals: query.department } }
-          : { name: { contains: '' } },
-      },
-      skip: offset,
-      take: limit,
-      select: selectedFieldLecturer(),
-    });
+    if (!user) {
+      throw new HttpException('User not found', 404);
+    }
 
-    if (result.length === 0) {
+    let totalData: number;
+    let result: Lecturer[];
+
+    if (user.role === 'FAKULTAS') {
+      totalData = await this.prisma.lecturer.count({
+        where: {
+          name: query.name ? { equals: query.name } : { contains: '' },
+          department: query.department
+            ? { name: { equals: query.department } }
+            : { name: { contains: '' } },
+        },
+      });
+
+      result = await this.prisma.lecturer.findMany({
+        where: {
+          name: query.name ? { equals: query.name } : { contains: '' },
+          department: query.department
+            ? { name: { equals: query.department } }
+            : { name: { contains: '' } },
+        },
+        skip: offset,
+        take: limit,
+        select: selectedFieldLecturer(),
+      });
+    } else if (user.role === 'PRODI') {
+      totalData = await this.prisma.lecturer.count({
+        where: {
+          departmentId: user.departmentId,
+        },
+      });
+
+      result = await this.prisma.lecturer.findMany({
+        where: {
+          departmentId: user.departmentId,
+        },
+        select: selectedFieldLecturer(),
+      });
+    }
+
+    if (!result) {
       throw new HttpException('Lecturer not found', 404);
     }
 
