@@ -63,7 +63,6 @@ export class DetailAgendaController {
 
   @Version('1')
   @Get()
-  @Roles('FAKULTAS')
   async findAllDetailAgendaByFilter(
     @Query()
     query: {
@@ -82,7 +81,7 @@ export class DetailAgendaController {
       return Response.success(
         HttpStatus.OK,
         'Success get all detail agenda',
-        result.dataAgenda,
+        result.detailAgendas,
         result.total,
       );
     } catch (error) {
