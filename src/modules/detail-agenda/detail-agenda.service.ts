@@ -430,10 +430,10 @@ export class DetailAgendaService {
       const result = await this.prisma.departmentAgenda.findMany({
         where: {
           detailAgenda: {
-            start: {
-              gte: startDate,
-              lte: endDate,
-            },
+            // start: {
+            //   gte: startDate,
+            //   lte: endDate,
+            // },
           },
           detailAgendaId: typeAgenda ? typeAgenda.id : undefined,
         },
@@ -473,9 +473,28 @@ export class DetailAgendaService {
         throw new HttpException('tidak ada agenda rapat', 404);
       }
 
+      const detailAgendas = [];
+
+      result.forEach((agenda) => {
+        detailAgendas.push({
+          uuid: agenda.detailAgenda.uuid,
+          title: agenda.detailAgenda.title,
+          start: agenda.detailAgenda.start,
+          finish: agenda.detailAgenda.finish,
+          isDone: agenda.detailAgenda.isDone,
+          location: agenda.detailAgenda.location,
+          typeAgenda: {
+            uuid: agenda.detailAgenda.typeAgenda.uuid,
+          },
+          author: {
+            username: agenda.detailAgenda.user.username,
+          },
+        });
+      });
+
       console.log(result);
       const countDetailAgenda = await this.prisma.detailAgenda.count();
-      return { dataAgenda: result, total: countDetailAgenda };
+      return { detailAgendas, total: countDetailAgenda };
     }
 
     const departmentsAgenda = await this.prisma.departmentAgenda.findMany({
