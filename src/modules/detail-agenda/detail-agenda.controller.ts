@@ -34,7 +34,7 @@ import { Roles } from 'src/guards/roles.decorator';
 
 @ApiTags('Detail Agenda')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PRODI')
+@Roles('PRODI', 'FAKULTAS')
 @Controller('detail-agendas')
 export class DetailAgendaController {
   constructor(private readonly detailAgendaService: DetailAgendaService) {}
