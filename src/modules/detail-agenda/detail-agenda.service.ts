@@ -430,10 +430,10 @@ export class DetailAgendaService {
       const result = await this.prisma.departmentAgenda.findMany({
         where: {
           detailAgenda: {
-            // start: {
-            //   gte: startDate,
-            //   lte: endDate,
-            // },
+            start: {
+              gte: startDate,
+              lte: endDate,
+            },
           },
           detailAgendaId: typeAgenda ? typeAgenda.id : undefined,
         },
