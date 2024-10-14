@@ -22,7 +22,7 @@ import { Roles } from 'src/guards/roles.decorator';
 
 @ApiTags('Type Agenda')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PRODI')
+@Roles('FAKULTAS', 'PRODI')
 @Controller('type-agendas')
 export class TypeAgendaController {
   constructor(private readonly typeAgendaService: TypeAgendaService) {}

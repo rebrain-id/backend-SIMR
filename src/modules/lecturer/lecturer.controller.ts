@@ -24,7 +24,7 @@ import { QueryLecturerDto } from './dto/query-lecturer.dto';
 
 @ApiTags('Lecturer')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('PRODI')
+@Roles('FAKULTAS', 'PRODI')
 @Controller('lecturer')
 export class LecturerController {
   constructor(private readonly lecturerService: LecturerService) {}

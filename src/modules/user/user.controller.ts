@@ -46,7 +46,7 @@ export class UserController {
   @ApiResponse(UserDocs.findAll())
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('PRODI')
+  @Roles('FAKULTAS', 'PRODI')
   @Get()
   async findAll(@Query() query: QueryUserDto) {
     try {
@@ -69,7 +69,7 @@ export class UserController {
   @ApiParam(UserDocs.userParam())
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('PRODI')
+  @Roles('FAKULTAS', 'PRODI')
   @Get(':username')
   async findOne(@Param('username') username: string) {
     try {
@@ -84,7 +84,7 @@ export class UserController {
   @ApiParam(UserDocs.userParam())
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('PRODI')
+  @Roles('FAKULTAS', 'PRODI')
   @Patch(':username')
   async update(
     @Param('username') username: string,
@@ -102,7 +102,7 @@ export class UserController {
   @ApiParam(UserDocs.userParam())
   @Version('1')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('PRODI')
+  @Roles('FAKULTAS', 'PRODI')
   @Delete(':username')
   async remove(@Param('username') username: string) {
     console.log(username);
