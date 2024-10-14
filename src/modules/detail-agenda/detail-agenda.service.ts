@@ -492,7 +492,6 @@ export class DetailAgendaService {
         });
       });
 
-      console.log(result);
       const countDetailAgenda = await this.prisma.detailAgenda.count();
       return { detailAgendas, total: countDetailAgenda };
     }
