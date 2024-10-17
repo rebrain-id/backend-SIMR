@@ -39,6 +39,16 @@ export class DepartmentService {
     }
   }
 
+  async findDepartmentOptions() {
+    const result = await this.prisma.department.findMany({
+      select: {
+        uuid: true,
+        name: true,
+      },
+    });
+    return result;
+  }
+
   async findAllDepartment(
     query: QueryDepartmentDto,
   ): Promise<{ result: Department[]; totalData: number }> {
