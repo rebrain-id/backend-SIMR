@@ -548,9 +548,9 @@ export class DetailAgendaService {
       },
     });
 
-    const dataAgenda = [];
+    const detailAgendas = [];
     departmentsAgenda.forEach((agenda) => {
-      dataAgenda.push({
+      detailAgendas.push({
         uuid: agenda.detailAgenda.uuid,
         title: agenda.detailAgenda.title,
         start: agenda.detailAgenda.start,
@@ -566,7 +566,7 @@ export class DetailAgendaService {
       });
     });
 
-    return { dataAgenda, total };
+    return { detailAgendas, total };
   }
 
   async findAllByUserDepartmentV2(
