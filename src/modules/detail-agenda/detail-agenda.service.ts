@@ -427,43 +427,35 @@ export class DetailAgendaService {
     if (!findUserByUsername) throw new HttpException('User not found', 404);
 
     if (findUserByUsername.role === 'FAKULTAS') {
-      const result = await this.prisma.departmentAgenda.findMany({
+      const result = await this.prisma.detailAgenda.findMany({
         where: {
-          detailAgenda: {
-            start: {
-              gte: startDate,
-              lte: endDate,
-            },
+          start: {
+            gte: startDate,
+            lte: endDate,
           },
-          detailAgendaId: typeAgenda ? typeAgenda.id : undefined,
+          typeAgendaId: typeAgenda ? typeAgenda.id : undefined,
         },
         orderBy: {
-          detailAgenda: {
-            id: 'desc',
-          },
+          id: 'desc',
         },
         skip: offset,
         take: limit,
         select: {
-          detailAgenda: {
+          uuid: true,
+          title: true,
+          start: true,
+          finish: true,
+          isDone: true,
+          location: true,
+          typeAgenda: {
             select: {
               uuid: true,
-              title: true,
-              start: true,
-              finish: true,
-              isDone: true,
-              location: true,
-              typeAgenda: {
-                select: {
-                  uuid: true,
-                  name: true,
-                },
-              },
-              user: {
-                select: {
-                  username: true,
-                },
-              },
+              name: true,
+            },
+          },
+          user: {
+            select: {
+              username: true,
             },
           },
         },
@@ -472,22 +464,21 @@ export class DetailAgendaService {
       if (result.length === 0) {
         throw new HttpException('tidak ada agenda rapat', 404);
       }
-
       const detailAgendas = [];
 
       result.forEach((agenda) => {
         detailAgendas.push({
-          uuid: agenda.detailAgenda.uuid,
-          title: agenda.detailAgenda.title,
-          start: agenda.detailAgenda.start,
-          finish: agenda.detailAgenda.finish,
-          isDone: agenda.detailAgenda.isDone,
-          location: agenda.detailAgenda.location,
+          uuid: agenda.uuid,
+          title: agenda.title,
+          start: agenda.start,
+          finish: agenda.finish,
+          isDone: agenda.isDone,
+          location: agenda.location,
           typeAgenda: {
-            uuid: agenda.detailAgenda.typeAgenda.uuid,
+            uuid: agenda.typeAgenda.uuid,
           },
           author: {
-            username: agenda.detailAgenda.user.username,
+            username: agenda.user.username,
           },
         });
       });
@@ -542,11 +533,7 @@ export class DetailAgendaService {
       },
     });
 
-    const total = await this.prisma.departmentAgenda.count({
-      where: {
-        departmentId: findUserByUsername.departmentId,
-      },
-    });
+    const total = await this.prisma.detailAgenda.count();
 
     const detailAgendas = [];
     departmentsAgenda.forEach((agenda) => {
@@ -717,35 +704,6 @@ export class DetailAgendaService {
           },
         });
 
-        await this.prisma.departmentAgenda.deleteMany({
-          where: {
-            detailAgendaId: exist.id,
-          },
-        });
-
-        const getDepartments = await this.prisma.department.findMany({
-          where: {
-            uuid: {
-              in: departmentsUuid,
-            },
-          },
-        });
-        const getIdDepartments = getDepartments.map(
-          (department) => department.id,
-        );
-
-        const dataForCreateDepartmentAgenda = [];
-        getIdDepartments.forEach((id) => {
-          dataForCreateDepartmentAgenda.push({
-            departmentId: id,
-            detailAgendaId: result.id,
-          });
-        });
-
-        await this.prisma.departmentAgenda.createMany({
-          data: dataForCreateDepartmentAgenda,
-        });
-
         if (!result) throw new HttpException('internal server error', 500);
 
         return result;
@@ -765,35 +723,6 @@ export class DetailAgendaService {
             notulen: files?.notulen?.[0]?.filename || undefined,
             absent: files?.absent?.[0]?.filename || undefined,
           },
-        });
-
-        await this.prisma.departmentAgenda.deleteMany({
-          where: {
-            detailAgendaId: exist.id,
-          },
-        });
-
-        const getDepartments = await this.prisma.department.findMany({
-          where: {
-            uuid: {
-              in: departmentsUuid,
-            },
-          },
-        });
-        const getIdDepartments = getDepartments.map(
-          (department) => department.id,
-        );
-
-        const dataForCreateDepartmentAgenda = [];
-        getIdDepartments.forEach((id) => {
-          dataForCreateDepartmentAgenda.push({
-            departmentId: id,
-            detailAgendaId: result.id,
-          });
-        });
-
-        await this.prisma.departmentAgenda.createMany({
-          data: dataForCreateDepartmentAgenda,
         });
 
         if (!result) throw new HttpException('internal server error', 500);
