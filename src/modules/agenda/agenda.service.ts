@@ -358,6 +358,54 @@ export class AgendaService {
     }
   }
 
+  async updateDepartmentsAgenda(request: any) {
+    const { departmentsUuid, detailAgendaUuid } = request;
+    const getDetailAgenda = await this.prisma.detailAgenda.findUnique({
+      where: { uuid: detailAgendaUuid },
+      select: {
+        id: true,
+      },
+    });
+    if (!getDetailAgenda) {
+      throw new HttpException('Detail Agenda not found', 404);
+    }
+
+    await this.prisma.departmentAgenda.deleteMany({
+      where: {
+        detailAgendaId: getDetailAgenda.id,
+      },
+    });
+
+    const getDepartments = await this.prisma.department.findMany({
+      where: { uuid: { in: departmentsUuid } },
+      select: {
+        id: true,
+      },
+    });
+    if (getDepartments.length === 0) {
+      throw new HttpException('Department not found', 404);
+    }
+
+    const dataDepartmentAgendas = [];
+    getDepartments.map((deparment) => {
+      dataDepartmentAgendas.push({
+        departmentId: deparment.id,
+        detailAgendaId: getDetailAgenda.id,
+      });
+    });
+
+    try {
+      const createDepartmentAgendas =
+        await this.prisma.departmentAgenda.createMany({
+          data: dataDepartmentAgendas,
+        });
+
+      return createDepartmentAgendas;
+    } catch (e) {
+      throw new HttpException('Failed create Agenda', 500);
+    }
+  }
+
   //Helper
   private parseDate(dateString: string, fieldName: string): Date {
     try {

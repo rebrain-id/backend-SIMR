@@ -52,6 +52,17 @@ export class DepartmentController {
   }
 
   @Version('1')
+  @Get('options')
+  async findDepartmentOptions() {
+    const result = await this.departmentService.findDepartmentOptions();
+    return Response.success(
+      HttpStatus.OK,
+      'Success get department options',
+      result,
+    );
+  }
+
+  @Version('1')
   @Get()
   @ApiResponse(DepartmentDocs.findAllResponse())
   async findAll(@Query() query: QueryDepartmentDto): Promise<Response> {

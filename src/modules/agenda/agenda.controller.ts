@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -18,10 +19,9 @@ import { checkExistAgenda } from './doc/agenda.doc';
 import { JwtAuthGuard } from 'src/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/guards/roles.guard';
 import { Roles } from 'src/guards/roles.decorator';
+import { version } from 'eslint-plugin-prettier';
 
 @ApiTags('Agenda')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('FAKULTAS', 'PRODI')
 @Controller('agendas')
 export class AgendaController {
   constructor(private readonly agendaService: AgendaService) {}
@@ -100,6 +100,20 @@ export class AgendaController {
       throw Response.error(
         error.status,
         error.message || 'Failed create agenda',
+      );
+    }
+  }
+  @Version('1')
+  @Patch('departments')
+  async update(@Body() request: any) {
+    try {
+      const result = await this.agendaService.updateDepartmentsAgenda(request);
+      return Response.success(HttpStatus.OK, 'Success update agenda', result);
+    } catch (error) {
+      console.log(error);
+      throw Response.error(
+        error.status,
+        error.message || 'Failed update agenda',
       );
     }
   }
