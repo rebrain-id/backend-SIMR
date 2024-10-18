@@ -665,7 +665,7 @@ export class DetailAgendaService {
       start,
       finish,
       isDone,
-      departmentsUuid,
+      location,
       typeAgendaUuid,
     } = updateDetailAgendumDto;
 
@@ -699,6 +699,7 @@ export class DetailAgendaService {
             finish: endDate,
             typeAgendaId: getTypeAgenda.id,
             isDone: Boolean(isDone),
+            location: location || '',
             notulen: files?.notulen?.[0]?.filename || undefined,
             absent: files?.absent?.[0]?.filename || undefined,
           },
@@ -720,6 +721,7 @@ export class DetailAgendaService {
             title,
             description,
             isDone: Boolean(isDone),
+            location: location || '',
             notulen: files?.notulen?.[0]?.filename || undefined,
             absent: files?.absent?.[0]?.filename || undefined,
           },
