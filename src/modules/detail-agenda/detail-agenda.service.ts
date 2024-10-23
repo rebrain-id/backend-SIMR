@@ -433,6 +433,9 @@ export class DetailAgendaService {
             gte: startDate,
             lte: endDate,
           },
+          title: {
+            contains: keyword ?? '',
+          },
           typeAgendaId: typeAgenda ? typeAgenda.id : undefined,
         },
         orderBy: {
@@ -492,7 +495,7 @@ export class DetailAgendaService {
         departmentId: findUserByUsername.departmentId,
         detailAgenda: {
           title: {
-            contains: keyword,
+            contains: keyword ?? '',
           },
           start: {
             gte: startDate,
