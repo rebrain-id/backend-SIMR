@@ -407,13 +407,18 @@ export class DetailAgendaService {
       return date;
     };
 
-    const startDate =
+    let startDate =
       this.parseDate(start, 'start') ?? getDefaultStartTime().toISOString();
-    const endDate =
+    let endDate =
       this.parseDate(finish, 'finish') ?? getDefaultEndTime().toISOString();
 
     if (startDate > endDate)
       throw new HttpException('finish must be greather from start', 400);
+
+    if (!start || !finish) {
+      startDate = undefined;
+      endDate = undefined;
+    }
 
     const findUserByUsername = await this.prisma.user.findUnique({
       where: {
