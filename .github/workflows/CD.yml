@@ -30,7 +30,7 @@ jobs:
             git status
             export NVM_DIR=~/.nvm
             source ~/.nvm/nvm.sh
-            nvm use --lte
+            nvm use --lts
             npm install 
             npm run build
             pm2 restart backend-simr
