@@ -464,6 +464,12 @@ export class DetailAgendaService {
           user: {
             select: {
               username: true,
+              department: {
+                select: {
+                  uuid: true,
+                  name: true,
+                },
+              },
             },
           },
         },
@@ -487,6 +493,8 @@ export class DetailAgendaService {
           },
           author: {
             username: agenda.user.username,
+            departmentUuid: agenda.user.department.uuid,
+            departmentName: agenda.user.department.name,
           },
         });
       });
@@ -534,6 +542,12 @@ export class DetailAgendaService {
             user: {
               select: {
                 username: true,
+                department: {
+                  select: {
+                    uuid: true,
+                    name: true,
+                  },
+                },
               },
             },
           },
@@ -557,6 +571,8 @@ export class DetailAgendaService {
         },
         author: {
           username: agenda.detailAgenda.user.username,
+          departmentUuid: agenda.detailAgenda.user.department.uuid,
+          departmentName: agenda.detailAgenda.user.department.name,
         },
       });
     });
