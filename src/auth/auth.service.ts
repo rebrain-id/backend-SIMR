@@ -20,6 +20,7 @@ export class AuthService {
         username: user.username,
         sub: user.id,
         role: user.role,
+        jabatanValue: user.jabatanValue,
       };
 
       const accessToken = await this.jwtService.signAsync(payload, {
