@@ -19,6 +19,7 @@ model User {
   password     String         @db.VarChar(100)
   departmentId Int?
   role         Role           @default(PRODI)
+  jabatanValue Int            @default(1) @db.TinyInt()
   department   Department?    @relation(fields: [departmentId], references: [id])
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
