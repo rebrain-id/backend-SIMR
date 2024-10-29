@@ -12,7 +12,7 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async register(createUserDto: CreateUserDto): Promise<User> {
-    const { username, password, departmentUuid } = createUserDto;
+    const { username, password, departmentUuid, jabatanValue } = createUserDto;
 
     const user = await this.prisma.user.findFirst({
       where: { username },
@@ -38,6 +38,7 @@ export class UserService {
           username,
           password: passwordHash,
           departmentId: department.id,
+          jabatanValue: Number(jabatanValue),
         },
         select: selectedFieldUser(),
       });

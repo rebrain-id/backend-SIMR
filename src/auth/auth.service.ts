@@ -21,6 +21,7 @@ export class AuthService {
         username: user.username,
         sub: user.id,
         role: user.role,
+        jabatanValue: user.jabatanValue,
         department: {
           uuid: user.department.uuid,
           name: user.department.name,

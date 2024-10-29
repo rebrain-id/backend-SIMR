@@ -464,6 +464,7 @@ export class DetailAgendaService {
           user: {
             select: {
               username: true,
+              jabatanValue: true,
               department: {
                 select: {
                   uuid: true,
@@ -495,6 +496,7 @@ export class DetailAgendaService {
             username: agenda.user.username,
             departmentUuid: agenda.user.department.uuid,
             departmentName: agenda.user.department.name,
+            jabatanValue: agenda.user.jabatanValue,
           },
         });
       });
@@ -542,6 +544,7 @@ export class DetailAgendaService {
             user: {
               select: {
                 username: true,
+                jabatanValue: true,
                 department: {
                   select: {
                     uuid: true,
@@ -573,6 +576,7 @@ export class DetailAgendaService {
           username: agenda.detailAgenda.user.username,
           departmentUuid: agenda.detailAgenda.user.department.uuid,
           departmentName: agenda.detailAgenda.user.department.name,
+          jabatanValue: agenda.detailAgenda.user.jabatanValue,
         },
       });
     });

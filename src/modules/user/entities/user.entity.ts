@@ -21,6 +21,7 @@ export function selectedFieldUser() {
       },
     },
     role: true,
+    jabatanValue: true,
     createdAt: true,
     updatedAt: true,
   };
