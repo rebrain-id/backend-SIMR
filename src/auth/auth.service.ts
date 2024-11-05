@@ -30,7 +30,7 @@ export class AuthService {
 
       const accessToken = await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET_KEY,
-        expiresIn: '30d',
+        expiresIn: '5m',
       });
 
       const refreshToken = await this.jwtService.signAsync(payload, {
@@ -72,19 +72,60 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token');
     }
 
-    const payload = {
-      username: decoded.username,
-      sub: decoded.sub,
-      role: decoded.role,
-    };
-
-    const newAccessToken = await this.jwtService.signAsync(payload, {
+    const newAccessToken = await this.jwtService.signAsync(decoded, {
       secret: process.env.JWT_SECRET_KEY,
-      expiresIn: '15m',
+      expiresIn: '5m',
     });
 
     return {
       access_token: newAccessToken,
+    };
+  }
+
+  async generateTokens(
+    data: any,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    const department = await this.prisma.department.findUnique({
+      where: { id: data.departmentId },
+    });
+
+    const payload = {
+      username: data.username,
+      sub: data.id,
+      role: data.role,
+      jabatanValue: data.jabatanValue,
+      department: {
+        uuid: department.uuid,
+        name: department.name,
+      },
+    };
+
+    const accessToken = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_SECRET_KEY,
+      expiresIn: '5m',
+    });
+
+    const refreshToken = await this.jwtService.signAsync(payload, {
+      secret: process.env.JWT_SECRET_KEY,
+      expiresIn: '30d',
+    });
+
+    // Hapus semua refresh token milik user terlebih dahulu
+    await this.prisma.refToken.deleteMany({
+      where: { userId: data.id },
+    });
+
+    // Buat refresh token baru
+    await this.prisma.refToken.create({
+      data: {
+        token: refreshToken,
+        userId: data.id,
+      },
+    });
+
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
     };
   }
 
