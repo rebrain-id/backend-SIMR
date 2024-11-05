@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -56,7 +60,7 @@ export class AuthService {
       };
     }
 
-    throw new UnauthorizedException();
+    throw new HttpException('Invalid username or password', 401);
   }
 
   async refreshToken(refreshToken: string): Promise<any> {

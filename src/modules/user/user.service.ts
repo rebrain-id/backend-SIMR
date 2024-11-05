@@ -130,6 +130,7 @@ export class UserService {
     const { username, oldPassword, newPassword, departmentUuid, role } =
       updateUserDto;
 
+    // Fetch existing user data by current username
     const user = await this.prisma.user.findUnique({
       where: { username: usernameParam },
     });
@@ -138,24 +139,18 @@ export class UserService {
       throw new HttpException('User not found', 404);
     }
 
-    const userAvailable = await this.prisma.user.findUnique({
-      where: { username },
-    });
-
-    if (userAvailable) {
-      throw new HttpException('Username already exists', 400);
-    }
-
+    // Check if the new username is already taken by another user
     if (username && username !== user.username) {
-      const existingUser = await this.prisma.user.findUnique({
+      const userAvailable = await this.prisma.user.findUnique({
         where: { username },
       });
 
-      if (existingUser) {
+      if (userAvailable) {
         throw new HttpException('Username already exists', 400);
       }
     }
 
+    // Update department if departmentUuid is provided
     if (departmentUuid) {
       const department = await this.prisma.department.findUnique({
         where: { uuid: departmentUuid },
@@ -167,20 +162,36 @@ export class UserService {
       user.departmentId = department.id;
     }
 
+    // Update password if both oldPassword and newPassword are provided
     if (oldPassword && newPassword) {
-      if (!(await bcrypt.compare(oldPassword, user.password))) {
-        throw new HttpException('Old password is wrong', 400);
+      const isPasswordCorrect = await bcrypt.compare(
+        oldPassword,
+        user.password,
+      );
+      if (!isPasswordCorrect) {
+        throw new HttpException('Old password is incorrect', 400);
       }
       user.password = await bcrypt.hash(newPassword, 10);
+    } else if ((oldPassword && !newPassword) || (!oldPassword && newPassword)) {
+      // If only one of the oldPassword or newPassword is provided, throw an error
+      throw new HttpException(
+        'Both old and new passwords are required to change the password',
+        400,
+      );
     }
 
+    // Update role if provided
     if (role) {
       user.role = role;
     }
 
-    user.username = username || user.username;
+    // Update username if provided
+    if (username) {
+      user.username = username;
+    }
 
     try {
+      // Update user in database with modified data
       const updatedUser = await this.prisma.user.update({
         where: { username: usernameParam },
         data: {
@@ -199,8 +210,10 @@ export class UserService {
         },
       });
 
+      // Generate new tokens after update
       const token = await this.auth.generateTokens(updatedUser);
 
+      // Exclude sensitive fields before returning the user object
       const { id, departmentId, ...userNoId } = updatedUser;
 
       return {
@@ -209,7 +222,7 @@ export class UserService {
         access_token: token.access_token,
       };
     } catch (error) {
-      throw new HttpException('Failed to update User', 500);
+      throw new HttpException('Failed to update user', 500);
     }
   }
 
