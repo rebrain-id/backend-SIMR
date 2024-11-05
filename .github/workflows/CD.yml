@@ -33,4 +33,4 @@ jobs:
             nvm use --lts
             npm install 
             npm run build
-            pm2 restart backend-simr
+            pm2 restart sim-r
