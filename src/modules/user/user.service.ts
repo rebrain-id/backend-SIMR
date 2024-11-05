@@ -6,10 +6,14 @@ import { selectedFieldUser, User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { Role } from '@prisma/client';
 import { QueryUserDto } from './dto/query-user.dto';
+import { AuthService } from '../../auth/auth.service';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auth: AuthService,
+  ) {}
 
   async register(createUserDto: CreateUserDto): Promise<User> {
     const { username, password, departmentUuid, jabatanValue } = createUserDto;
@@ -118,7 +122,11 @@ export class UserService {
   async updateUser(
     usernameParam: string,
     updateUserDto: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<{
+    user: Omit<User, 'id' | 'departmentId'>;
+    access_token: string;
+    refresh_token: string;
+  }> {
     const { username, oldPassword, newPassword, departmentUuid, role } =
       updateUserDto;
 
@@ -130,8 +138,12 @@ export class UserService {
       throw new HttpException('User not found', 404);
     }
 
-    if (username && usernameParam === username) {
-      throw new HttpException('Username cannot be same', 400);
+    const userAvailable = await this.prisma.user.findUnique({
+      where: { username },
+    });
+
+    if (userAvailable) {
+      throw new HttpException('Username already exists', 400);
     }
 
     if (username && username !== user.username) {
@@ -177,10 +189,25 @@ export class UserService {
           departmentId: user.departmentId,
           role: user.role,
         },
-        select: selectedFieldUser(),
+        include: {
+          department: {
+            select: {
+              uuid: true,
+              name: true,
+            },
+          },
+        },
       });
 
-      return updatedUser;
+      const token = await this.auth.generateTokens(updatedUser);
+
+      const { id, departmentId, ...userNoId } = updatedUser;
+
+      return {
+        user: userNoId,
+        refresh_token: token.refresh_token,
+        access_token: token.access_token,
+      };
     } catch (error) {
       throw new HttpException('Failed to update User', 500);
     }

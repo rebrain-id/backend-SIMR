@@ -91,7 +91,11 @@ export class UserController {
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<Response> {
     try {
-      const result = await this.userService.updateUser(username, updateUserDto);
+      const { user, refresh_token, access_token } =
+        await this.userService.updateUser(username, updateUserDto);
+
+      const result = { ...user, refresh_token, access_token };
+
       return Response.success(HttpStatus.OK, 'Success update user', result);
     } catch (error) {
       throw Response.error(error.status, error.message || 'Failed update user');
@@ -105,8 +109,6 @@ export class UserController {
   @Roles('FAKULTAS', 'PRODI')
   @Delete(':username')
   async remove(@Param('username') username: string) {
-    console.log(username);
-
     try {
       const result = await this.userService.removeUser(username);
       return Response.success(HttpStatus.OK, 'Success delete user', result);
