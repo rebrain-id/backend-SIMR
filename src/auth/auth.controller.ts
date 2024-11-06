@@ -36,7 +36,7 @@ export class AuthController {
   }
 
   @Version('1')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('FAKULTAS', 'PRODI')
   @Post('get-access')
   async refreshToken(
