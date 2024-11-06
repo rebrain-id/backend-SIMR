@@ -87,7 +87,7 @@ export class DetailAgendaController {
     } catch (error) {
       throw Response.error(
         error.status,
-        error || 'Failed get all detail agenda',
+        error.message || 'Failed get all detail agenda',
       );
     }
   }

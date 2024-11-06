@@ -34,12 +34,12 @@ export class AuthService {
 
       const accessToken = await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET_KEY,
-        expiresIn: '5m',
+        expiresIn: '90d',
       });
 
       const refreshToken = await this.jwtService.signAsync(payload, {
         secret: process.env.JWT_SECRET_KEY,
-        expiresIn: '30d',
+        expiresIn: '90d',
       });
 
       const userId = await this.prisma.user.findUnique({
