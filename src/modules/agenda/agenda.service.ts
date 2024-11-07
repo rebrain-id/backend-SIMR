@@ -417,7 +417,7 @@ export class AgendaService {
         );
       return date;
     } catch (e) {
-      throw new HttpException('Invalid date format', 400);
+      return undefined;
     }
   }
 }
