@@ -111,9 +111,16 @@ export class UserController {
   async remove(@Param('username') username: string) {
     try {
       const result = await this.userService.removeUser(username);
-      return Response.success(HttpStatus.OK, 'Success delete user', result);
+      return Response.success(
+        HttpStatus.OK,
+        'Success soft delete user',
+        result,
+      );
     } catch (error) {
-      throw Response.error(error.status, error.message || 'Failed delete user');
+      throw Response.error(
+        error.status,
+        error.message || 'Failed soft delete user',
+      );
     }
   }
 }

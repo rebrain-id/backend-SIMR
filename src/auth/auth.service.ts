@@ -16,7 +16,7 @@ export class AuthService {
 
   async login(username: string, password: string): Promise<any> {
     const user = await this.prisma.user.findUnique({
-      where: { username },
+      where: { username, deletedAt: null },
       include: { department: true },
     });
 

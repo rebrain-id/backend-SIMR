@@ -85,6 +85,7 @@ export class UserService {
         role: query.role
           ? { equals: (query.role as string).toUpperCase() as Role }
           : undefined,
+        deletedAt: null,
       },
       skip: offset,
       take: limit,
@@ -104,7 +105,7 @@ export class UserService {
 
   async findOneUser(usernameParam: string): Promise<User> {
     const result = await this.prisma.user.findUnique({
-      where: { username: usernameParam },
+      where: { username: usernameParam, deletedAt: null },
       select: selectedFieldUser(),
     });
 
@@ -234,8 +235,12 @@ export class UserService {
     if (!exists) throw new HttpException('User not found', 404);
 
     try {
-      await this.prisma.user.delete({
+      await this.prisma.user.update({
         where: { username: usernameParam },
+        data: {
+          username: `${usernameParam}-${new Date().toISOString().split('T')[0]}`,
+          deletedAt: new Date(),
+        },
       });
       return 'Success delete user with username: ' + usernameParam;
     } catch (error) {
