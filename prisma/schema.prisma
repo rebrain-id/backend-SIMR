@@ -23,6 +23,7 @@ model User {
   department   Department?    @relation(fields: [departmentId], references: [id])
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  deletedAt    DateTime?
   DetailAgenda DetailAgenda[]
   refToken     RefToken[]
 }
