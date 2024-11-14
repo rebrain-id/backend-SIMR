@@ -51,7 +51,7 @@ export class FileUploadInterceptor implements MulterOptionsFactory {
         callback(null, true);
       },
       limits: {
-        fileSize: 5 * 1024 * 1024, // Batasan ukuran file 5MB
+        fileSize: 15 * 1024 * 1024, // Batasan ukuran file 5MB
       },
     };
   }
